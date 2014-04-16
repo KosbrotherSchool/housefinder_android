@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+
+<!--
+    A DrawerLayout is indended to be used as the top-level content view
+    using match_parent for both width and height to consume the full space available.
+-->
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/map_wrapper"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" >
+
+                <fragment
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    class="com.kosbrother.houseprice.fragment.TransparentSupportMapFragment" />
+
+                <LinearLayout
+                    android:id="@+id/linear_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:background="#80000000"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <ImageView
+                        android:id="@+id/image_estate"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:background="@drawable/marker_sale" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:text="出售"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/dialog_text_size" />
+
+                    <ImageView
+                        android:id="@+id/image_estate"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:background="@drawable/marker_rent" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:text="出租"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/dialog_text_size" />
+
+                    <ImageView
+                        android:id="@+id/image_estate"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:background="@drawable/marker_presell" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="25dp"
+                        android:layout_marginLeft="5dp"
+                        android:text="預售"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/dialog_text_size" />
+
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="25dp"
+                        android:gravity="right|center_vertical"
+                        android:text="單位:元"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/dialog_small_text_size" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@id/linear_title"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="15dp"
+                    android:orientation="vertical" >
+
+                    <ImageButton
+                        android:id="@+id/image_btn_focus"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/grid_selector"
+                        android:padding="5dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/icon_access_location_white" />
+
+                    <ImageButton
+                        android:id="@+id/image_btn_layers"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/grid_selector"
+                        android:padding="8dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/icon_layers_white" />
+
+                    <!--
+                         <ImageButton
+                        android:id="@+id/image_btn_filter"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/grid_selector"
+                        android:padding="8dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/icon_filter_white" />
+                    -->
+                </LinearLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/linear_bottom"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@color/white"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+               
+                <LinearLayout
+                    android:id="@+id/linear_price_change"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/transparent_button"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:clickable="false"
+                        android:src="@drawable/area_location" />
+
+                    <TextView
+                        android:id="@+id/house_price_changing_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:clickable="false"
+                        android:gravity="center"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:text="區域搜索" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/gray_1" >
+                </LinearLayout>
+               
+
+                <LinearLayout
+                    android:id="@+id/linear_find_house"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/transparent_button"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:clickable="false"
+                        android:src="@drawable/icon_house" />
+
+                    <TextView
+                        android:id="@+id/house_price_data_list_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:clickable="false"
+                        android:gravity="center"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:text="篩選條件" />
+                </LinearLayout>
+
+                <!-- <LinearLayout
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="@color/gray_1" >
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_data_list"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/transparent_button"
+                    android:gravity="center"
+                    android:orientation="horizontal" >
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:clickable="false"
+                        android:src="@drawable/icon_list" />
+
+                    <TextView
+                        android:id="@+id/house_price_data_list_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="2dp"
+                        android:clickable="false"
+                        android:gravity="center"
+                        android:paddingBottom="5dp"
+                        android:paddingTop="5dp"
+                        android:text="列表資料" />
+                </LinearLayout> -->
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/adLayout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true" >
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/first_teach_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_gradient"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:weightSum="3" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="點擊地圖可改變地標位置"
+                    android:textColor="@color/white"
+                    android:textSize="20dp" />
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/icon_touch" />
+
+                <Button
+                    android:id="@+id/first_confrim_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/contact_us_selector"
+                    android:text="確定" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/left_drawer"
+        android:layout_width="270dp"
+        android:layout_height="fill_parent"
+        android:layout_gravity="left"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/left_list_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#EBEBEB" />
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>
