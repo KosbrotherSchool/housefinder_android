@@ -13,9 +13,9 @@
                 android:color="#dfdfdf" />
         </shape>  
     </item>  
-    <item>        
+   <item>        
         <shape>  
-            <solid android:color="#00000000"/>
+            <solid android:color="#0000"/>
         </shape>  
-    </item>  
+    </item> 
 </selector> 

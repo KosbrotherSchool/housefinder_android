@@ -13,36 +13,12 @@ public class InfoParserApi
 				buildType = "公寓";
 				break;
 			case 2:
-				buildType = "透天厝";
+				buildType = "電梯大樓";
 				break;
 			case 3:
-				buildType = "店面";
+				buildType = "透天厝";
 				break;
 			case 4:
-				buildType = "商辦";
-				break;
-			case 5:
-				buildType = "住宅";
-				break;
-			case 6:
-				buildType = "華廈";
-				break;
-			case 7:
-				buildType = "套房";
-				break;
-			case 8:
-				buildType = "工廠";
-				break;
-			case 9:
-				buildType = "廠辦";
-				break;
-			case 10:
-				buildType = "農舍";
-				break;
-			case 11:
-				buildType = "倉庫";
-				break;
-			case 12:
 				buildType = "其他";
 				break;
 			default:
@@ -97,7 +73,8 @@ public class InfoParserApi
 		}
 		if (living_rooms != 0)
 		{
-			arrangeString = arrangeString + Integer.toString(living_rooms) + "廳";
+			arrangeString = arrangeString + Integer.toString(living_rooms)
+					+ "廳";
 		}
 		if (rest_rooms != 0)
 		{
@@ -107,10 +84,10 @@ public class InfoParserApi
 		{
 			arrangeString = arrangeString + Integer.toString(balconies) + "陽台";
 		}
-		
+
 		return arrangeString;
 	}
-	
+
 	public static String parseLayers(int layer, int total_layer)
 	{
 		String layerString = "";
@@ -119,13 +96,14 @@ public class InfoParserApi
 			if (layer != 0)
 			{
 				layerString = Integer.toString(layer) + "/";
-			}else {
+			} else
+			{
 				layerString = "整棟/";
 			}
-			
+
 			layerString = layerString + Integer.toString(total_layer) + "樓";
 		}
-		
+
 		return layerString;
 	}
 
@@ -197,6 +175,50 @@ public class InfoParserApi
 		}
 
 		return rentAreaString;
+	}
+
+	public static String parsePhoneNumber(String phoneNumber)
+	{
+		String phoneString = "";
+		String word2 = phoneNumber.substring(0, 2);
+		String word3 = phoneNumber.substring(0, 3);
+		if (word2.equals("02"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("03"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("04"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("05"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("06"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("07"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		} else if (word2.equals("08"))
+		{
+			phoneString = word2 + "-" + phoneNumber.substring(2);
+		}else if (word2.equals("09")) {
+			phoneString =  phoneNumber.substring(0, 4) +"-"+ phoneNumber.substring(4);
+		}
+		
+		if (word3.equals("037"))
+		{
+			phoneString =  word3 +"-"+ phoneNumber.substring(3);
+		}else if (word3.equals("049")) {
+			phoneString =  word3 +"-"+ phoneNumber.substring(3);
+		}else if (word3.equals("089")) {
+			phoneString =  word3 +"-"+ phoneNumber.substring(3);
+		}else if (word3.equals("082")) {
+			phoneString =  word3 +"-"+ phoneNumber.substring(3);
+		}
+
+		return phoneString;
 	}
 
 }

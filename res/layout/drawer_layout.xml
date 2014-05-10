@@ -49,12 +49,13 @@
                 <LinearLayout
                     android:id="@+id/linear_title"
                     android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:background="#80000000"
+                    android:layout_height="34dp"
+                    android:background="#805C5C5C"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:padding="4dp" >
 
+                    <!--
                     <ImageView
                         android:id="@+id/image_estate"
                         android:layout_width="25dp"
@@ -69,44 +70,67 @@
                         android:text="出售"
                         android:textColor="@color/white"
                         android:textSize="@dimen/dialog_text_size" />
+                    -->
 
-                    <ImageView
-                        android:id="@+id/image_estate"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="5dp"
-                        android:background="@drawable/marker_rent" />
+                    <LinearLayout
+                        android:id="@+id/linear_title_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:visibility="gone" >
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="5dp"
-                        android:text="出租"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/dialog_text_size" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="5dp"
+                            android:text="搜索中..."
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/dialog_text_size" />
 
-                    <ImageView
-                        android:id="@+id/image_estate"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="5dp"
-                        android:background="@drawable/marker_presell" />
+                        <ProgressBar
+                            android:id="@+id/title_progress"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="#00000000" />
+                    </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="5dp"
-                        android:text="預售"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/dialog_text_size" />
+                    <LinearLayout
+                        android:id="@+id/linear_title_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                         >
 
-                    <TextView
-                        android:layout_width="fill_parent"
-                        android:layout_height="25dp"
-                        android:gravity="right|center_vertical"
-                        android:text="單位:元"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/dialog_small_text_size" />
+                        <ImageView
+                            android:id="@+id/image_estate"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="5dp"
+                            android:background="@drawable/marker_rent" />
+
+                        <TextView
+                            android:id="@+id/title_rent_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="5dp"
+                            android:text="出租"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/dialog_text_size" />
+
+
+                        <TextView
+                            android:id="@+id/ttt"
+                            android:layout_width="0dp"
+                            android:layout_height="25dp"
+                            android:layout_weight="1"
+                            android:gravity="right|center_vertical"
+                            android:text="單位:元"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/dialog_small_text_size" />
+
+                    </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
@@ -136,124 +160,103 @@
                         android:padding="8dp"
                         android:scaleType="fitXY"
                         android:src="@drawable/icon_layers_white" />
+                </LinearLayout>
 
-                    <!--
-                         <ImageButton
-                        android:id="@+id/image_btn_filter"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/grid_selector"
-                        android:padding="8dp"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/icon_filter_white" />
-                    -->
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true" >
+
+                    <include
+                        android:id="@+id/main_rent_layout"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        layout="@layout/mainactivity_rent_item"
+                        android:visibility="gone" />
                 </LinearLayout>
             </RelativeLayout>
 
             <LinearLayout
-                android:id="@+id/linear_bottom"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:background="@color/white"
-                android:gravity="center_vertical"
-                android:orientation="horizontal" >
+                android:orientation="vertical" >
 
-               
                 <LinearLayout
-                    android:id="@+id/linear_price_change"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/transparent_button"
-                    android:gravity="center"
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="0dp"
+                    android:background="@color/line_gray" />
+
+                <LinearLayout
+                    android:id="@+id/linear_bottom"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal" >
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:clickable="false"
-                        android:src="@drawable/area_location" />
-
-                    <TextView
-                        android:id="@+id/house_price_changing_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:clickable="false"
+                    <LinearLayout
+                        android:id="@+id/linear_location_button"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/transparent_button"
                         android:gravity="center"
-                        android:paddingBottom="5dp"
-                        android:paddingTop="5dp"
-                        android:text="區域搜索" />
-                </LinearLayout>
+                        android:orientation="horizontal" >
 
-                <LinearLayout
-                    android:layout_width="1dp"
-                    android:layout_height="40dp"
-                    android:background="@color/gray_1" >
-                </LinearLayout>
-               
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:clickable="false"
+                            android:src="@drawable/area_location" />
 
-                <LinearLayout
-                    android:id="@+id/linear_find_house"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/transparent_button"
-                    android:gravity="center"
-                    android:orientation="horizontal" >
+                        <TextView
+                            android:id="@+id/house_price_changing_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="2dp"
+                            android:clickable="false"
+                            android:gravity="center"
+                            android:paddingBottom="5dp"
+                            android:paddingTop="5dp"
+                            android:text="區域搜索" />
+                    </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:clickable="false"
-                        android:src="@drawable/icon_house" />
+                    <LinearLayout
+                        android:layout_width="1dp"
+                        android:layout_height="40dp"
+                        android:background="@color/gray_1" >
+                    </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/house_price_data_list_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:clickable="false"
+                    <LinearLayout
+                        android:id="@+id/linear_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/transparent_button"
                         android:gravity="center"
-                        android:paddingBottom="5dp"
-                        android:paddingTop="5dp"
-                        android:text="篩選條件" />
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:clickable="false"
+                            android:src="@drawable/filter_black" />
+
+                        <TextView
+                            android:id="@+id/house_price_data_list_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="2dp"
+                            android:clickable="false"
+                            android:gravity="center"
+                            android:paddingBottom="5dp"
+                            android:paddingTop="5dp"
+                            android:text="篩選條件" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- <LinearLayout
-                    android:layout_width="1dp"
-                    android:layout_height="40dp"
-                    android:background="@color/gray_1" >
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/linear_data_list"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/transparent_button"
-                    android:gravity="center"
-                    android:orientation="horizontal" >
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:clickable="false"
-                        android:src="@drawable/icon_list" />
-
-                    <TextView
-                        android:id="@+id/house_price_data_list_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:clickable="false"
-                        android:gravity="center"
-                        android:paddingBottom="5dp"
-                        android:paddingTop="5dp"
-                        android:text="列表資料" />
-                </LinearLayout> -->
             </LinearLayout>
 
             <RelativeLayout

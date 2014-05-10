@@ -1,6 +1,7 @@
 package com.kosbrother.housefinder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -31,6 +32,11 @@ import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
 import at.bartinger.list.item.SectionItem;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.kosbrother.houseprice.adapter.ListRentHouseAdapter;
 
@@ -60,14 +66,15 @@ public class ListActivity extends FragmentActivity
 
 	private RelativeLayout adBannerLayout;
 	private AdView adMobAdView;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.drawer_list_layout);
 		mActionBar = getActionBar();
-		mActionBar.setTitle("找屋高手: " + Integer.toString(Datas.mRentHouses.size()) + "筆");
+		mActionBar.setTitle("找屋高手: "
+				+ Integer.toString(Datas.mRentHouses.size()) + "筆");
 
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
@@ -75,15 +82,17 @@ public class ListActivity extends FragmentActivity
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 
 		// mDrawerLayout.setDrawerListener(new DemoDrawerListener());
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
+				GravityCompat.START);
 		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 
 		// enable ActionBar app icon to behave as action to toggle nav drawer
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer,
-				R.string.drawer_open, R.string.drawer_close)
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+				R.drawable.ic_drawer, R.string.drawer_open,
+				R.string.drawer_close)
 		{
 			public void onDrawerClosed(View view)
 			{
@@ -104,23 +113,25 @@ public class ListActivity extends FragmentActivity
 		setDrawerLayout();
 
 		mainListView = (ListView) findViewById(R.id.list_estates);
-		mAdapter = new ListRentHouseAdapter(ListActivity.this, Datas.mRentHouses);
+		mAdapter = new ListRentHouseAdapter(ListActivity.this,
+				Datas.mRentHouses);
 		mainListView.setAdapter(mAdapter);
-		
-//		CallAds();
-		
+
+		CallAds();
+
 	}
 
 	private void setDrawerLayout()
 	{
 
-		items.add(new SectionItem("實價登錄搜尋"));
+		items.add(new SectionItem("房屋搜尋"));
 		items.add(new EntryItem("位置附近", R.drawable.icon_access_location));
 		items.add(new EntryItem("條件篩選", R.drawable.icon_filter));
+		items.add(new EntryItem("我的最愛", R.drawable.icon_favorite));
 		items.add(new SectionItem("房貸計算"));
 		items.add(new EntryItem("房貸計算機", R.drawable.icon_calculator));
 		items.add(new SectionItem("其他"));
-		items.add(new EntryItem("推薦", R.drawable.icon_recommend));
+		items.add(new EntryItem("分享", R.drawable.icon_recommend));
 		items.add(new EntryItem("給評(星星)", R.drawable.icon_star3));
 		items.add(new EntryItem("關於我們", R.drawable.icon_about));
 
@@ -138,70 +149,80 @@ public class ListActivity extends FragmentActivity
 					switch (position)
 					{
 					case 1:
-						// EasyTracker easyTracker = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker.send(MapBuilder.createEvent("Button",
-						// "button_press", "focus_button2", null).build());
-//						getLocation(true, 1);
-//						mDrawerLayout.closeDrawer(leftDrawer);
+						EasyTracker easyTracker = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker.send(MapBuilder.createEvent("Button",
+								"button_press", "focus_button2", null).build());
+						finish();
+						MainActivity.isBackFromListGetLocationButton = true;
 						break;
 					case 2:
-						// EasyTracker easyTracker2 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker2
-						// .send(MapBuilder.createEvent("Button",
-						// "button_press", "filter_button2", null)
-						// .build());
-						Intent intent = new Intent();
-						intent.setClass(ListActivity.this, FilterActivity.class);
-						startActivity(intent);
+						EasyTracker easyTracker2 = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker2
+								.send(MapBuilder.createEvent("Button",
+										"button_press", "filter_button2", null)
+										.build());
+						finish();
+						MainActivity.isBackFromListFilterButton = true;
+						break;
+					case 3:
+						EasyTracker easyTrackerF = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTrackerF.send(MapBuilder.createEvent("Button",
+								"button_press", "Favorite_button", null)
+								.build());
+						Intent intentFavorite = new Intent();
+						intentFavorite.setClass(ListActivity.this,
+								FavoriteActivity.class);
+						startActivity(intentFavorite);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
-					case 4:
-						// EasyTracker easyTracker3 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker3.send(MapBuilder.createEvent("Button",
-						// "button_press", "calculator_button", null)
-						// .build());
+					case 5:
+						EasyTracker easyTracker3 = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker3.send(MapBuilder.createEvent("Button",
+								"button_press", "calculator_button", null)
+								.build());
 
 						Intent intent2 = new Intent(ListActivity.this,
 								CalculatorActivity.class);
 						startActivity(intent2);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
-					case 6:
+					case 7:
+						EasyTracker easyTracker4 = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker4.send(MapBuilder.createEvent("Button",
+								"button_press", "share_button", null).build());
+
 						Intent intent3 = new Intent(Intent.ACTION_SEND);
 						intent3.setType("text/plain");
 						intent3.putExtra(Intent.EXTRA_TEXT,
-								"看屋高手 https://play.google.com/store/apps/details?id=com.kosbrother.houseprice");
+								"找屋高手 https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						startActivity(Intent.createChooser(intent3, "Share..."));
-
-						// EasyTracker easyTracker4 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker4.send(MapBuilder.createEvent("Button",
-						// "button_press", "share_button", null).build());
-						break;
-					case 7:
-						// EasyTracker easyTracker5 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker5.send(MapBuilder.createEvent("Button",
-						// "button_press", "star_button", null).build());
-
-						Uri uri = Uri
-								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.houseprice");
-						Intent it = new Intent(Intent.ACTION_VIEW, uri);
-						startActivity(it);
-						Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
-								ListActivity.this);
-						Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
-								false, ListActivity.this);
 						break;
 					case 8:
+						EasyTracker easyTracker5 = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker5.send(MapBuilder.createEvent("Button",
+								"button_press", "star_button", null).build());
+
+						Uri uri = Uri
+								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
+						Intent it = new Intent(Intent.ACTION_VIEW, uri);
+						startActivity(it);
+						// Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
+						// ListActivity.this);
+						// Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
+						// false, ListActivity.this);
+						break;
+					case 9:
 						// about us
-						// EasyTracker easyTracker6 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker6.send(MapBuilder.createEvent("Button",
-						// "button_press", "about_button", null).build());
+						EasyTracker easyTracker6 = EasyTracker
+								.getInstance(ListActivity.this);
+						easyTracker6.send(MapBuilder.createEvent("Button",
+								"button_press", "about_button", null).build());
 
 						Intent intent5 = new Intent(ListActivity.this,
 								AboutUsActivity.class);
@@ -250,13 +271,16 @@ public class ListActivity extends FragmentActivity
 				break;
 			case R.id.menu_sorting:
 
-				AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						ListActivity.this);
 				// Set the dialog title
 				builder.setTitle("排序").setSingleChoiceItems(R.array.list_sort,
-						currentSortPosition, new DialogInterface.OnClickListener()
+						currentSortPosition,
+						new DialogInterface.OnClickListener()
 						{
 							@Override
-							public void onClick(DialogInterface dialog, int position)
+							public void onClick(DialogInterface dialog,
+									int position)
 							{
 								sortingByPosition(position);
 								currentSortPosition = position;
@@ -275,27 +299,22 @@ public class ListActivity extends FragmentActivity
 	{
 		switch (position)
 		{
-//		case 0:
-//			Collections.sort(Datas.mEstates, new Datas.BuyPerSquareComparator(0));
-//			break;
-//		case 1:
-//			Collections.sort(Datas.mEstates, new Datas.BuyPerSquareComparator(1));
-//			break;
-//		case 2:
-//			Collections.sort(Datas.mEstates, new Datas.BuyTotalPriceComparator(0));
-//			break;
-//		case 3:
-//			Collections.sort(Datas.mEstates, new Datas.BuyTotalPriceComparator(1));
-//			break;
-//		case 4:
-//			Collections.sort(Datas.mEstates, new Datas.BuildingExchangeAreaComparator(0));
-//			break;
-//		case 5:
-//			Collections.sort(Datas.mEstates, new Datas.BuildingExchangeAreaComparator(1));
-//			break;
-//		case 6:
-//			Collections.sort(Datas.mEstates, new Datas.BuiltDateComparator());
-//			break;
+		case 0:
+			Collections.sort(Datas.mRentHouses,
+					new Datas.RentPriceComparator(0));
+			break;
+		case 1:
+			Collections.sort(Datas.mRentHouses,
+					new Datas.RentPriceComparator(1));
+			break;
+		case 2:
+			Collections
+					.sort(Datas.mRentHouses, new Datas.RentAreaComparator(0));
+			break;
+		case 3:
+			Collections
+					.sort(Datas.mRentHouses, new Datas.RentAreaComparator(1));
+			break;
 		}
 		mAdapter.notifyDataSetChanged();
 	}
@@ -449,7 +468,8 @@ public class ListActivity extends FragmentActivity
 			}
 
 			@Override
-			public android.view.MenuItem setActionProvider(ActionProvider actionProvider)
+			public android.view.MenuItem setActionProvider(
+					ActionProvider actionProvider)
 			{
 				// TODO Auto-generated method stub
 				return null;
@@ -526,7 +546,8 @@ public class ListActivity extends FragmentActivity
 			}
 
 			@Override
-			public android.view.MenuItem setOnActionExpandListener(OnActionExpandListener listener)
+			public android.view.MenuItem setOnActionExpandListener(
+					OnActionExpandListener listener)
 			{
 				// TODO Auto-generated method stub
 				return null;
@@ -541,7 +562,8 @@ public class ListActivity extends FragmentActivity
 			}
 
 			@Override
-			public android.view.MenuItem setShortcut(char numericChar, char alphaChar)
+			public android.view.MenuItem setShortcut(char numericChar,
+					char alphaChar)
 			{
 				// TODO Auto-generated method stub
 				return null;
@@ -591,81 +613,6 @@ public class ListActivity extends FragmentActivity
 		};
 	}
 
-	
-
-	// private ActionBarHelper createActionBarHelper() {
-	// if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-	// return new ActionBarHelperICS();
-	// } else {
-	// return new ActionBarHelper();
-	// }
-	// }
-	//
-	// private class ActionBarHelper {
-	// public void init() {}
-	// public void onDrawerClosed() {}
-	// public void onDrawerOpened() {}
-	// public void setTitle(CharSequence title) {}
-	// }
-	//
-	// private class ActionBarHelperICS extends ActionBarHelper {
-	// private final ActionBar mActionBar;
-	// private CharSequence mDrawerTitle;
-	// private CharSequence mTitle;
-	//
-	// ActionBarHelperICS() {
-	// mActionBar = getActionBar();
-	// }
-	//
-	// @Override
-	// public void init() {
-	// mActionBar.setDisplayHomeAsUpEnabled(true);
-	// mActionBar.setHomeButtonEnabled(true);
-	// mTitle = mDrawerTitle = getTitle();
-	// }
-	//
-	// @Override
-	// public void onDrawerClosed() {
-	// super.onDrawerClosed();
-	// mActionBar.setTitle(mTitle);
-	// }
-	//
-	// @Override
-	// public void onDrawerOpened() {
-	// super.onDrawerOpened();
-	// mActionBar.setTitle(mDrawerTitle);
-	// }
-	//
-	// @Override
-	// public void setTitle(CharSequence title) {
-	// mTitle = title;
-	// }
-	// }
-
-	// private class DemoDrawerListener implements DrawerLayout.DrawerListener {
-	// @Override
-	// public void onDrawerOpened(View drawerView) {
-	// mDrawerToggle.onDrawerOpened(drawerView);
-	// mActionBar.onDrawerOpened();
-	// }
-	//
-	// @Override
-	// public void onDrawerClosed(View drawerView) {
-	// mDrawerToggle.onDrawerClosed(drawerView);
-	// mActionBar.onDrawerClosed();
-	// }
-	//
-	// @Override
-	// public void onDrawerSlide(View drawerView, float slideOffset) {
-	// mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-	// }
-	//
-	// @Override
-	// public void onDrawerStateChanged(int newState) {
-	// mDrawerToggle.onDrawerStateChanged(newState);
-	// }
-	// }
-
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState)
 	{
@@ -678,7 +625,8 @@ public class ListActivity extends FragmentActivity
 	{
 		super.onStart();
 		// The rest of your onStart() code.
-//		EasyTracker.getInstance(this).activityStart(this); // Add this method.
+		 EasyTracker.getInstance(this).activityStart(this); // Add this
+		// method.
 	}
 
 	@Override
@@ -686,41 +634,44 @@ public class ListActivity extends FragmentActivity
 	{
 		super.onStop();
 		// The rest of your onStop() code.
-//		EasyTracker.getInstance(this).activityStop(this); // Add this method.
+		 EasyTracker.getInstance(this).activityStop(this); // Add this method.
 	}
-	
-//	private void CallAds()
-//	{
-//
-//		adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);
-//		final AdRequest adReq = new AdRequest.Builder().build();
-//
-//		// 12-18 17:01:12.438: I/Ads(8252): Use
-//		// AdRequest.Builder.addTestDevice("A25819A64B56C65500038B8A9E7C19DD")
-//		// to get test ads on this device.
-//
-//		adMobAdView = new AdView(ListActivity.this);
-//		adMobAdView.setAdSize(AdSize.SMART_BANNER);
-//		adMobAdView.setAdUnitId(Constants.MEDIATION_KEY);
-//
-//		adMobAdView.loadAd(adReq);
-//		adMobAdView.setAdListener(new AdListener()
-//		{
-//			@Override
-//			public void onAdLoaded() {
-//				adBannerLayout.setVisibility(View.VISIBLE);
-//				if (adBannerLayout.getChildAt(0)!=null)
-//				{
-//					adBannerLayout.removeViewAt(0);
-//				}
-//				adBannerLayout.addView(adMobAdView);
-//			}
-//			
-//			public void onAdFailedToLoad(int errorCode) {
-//				adBannerLayout.setVisibility(View.GONE);
-//			}
-//			
-//		});	
-//	}
+
+	private void CallAds()
+	{
+		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
+				ListActivity.this);
+
+		if (!isGivenStar)
+		{
+			adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);
+			final AdRequest adReq = new AdRequest.Builder().build();
+
+			adMobAdView = new AdView(ListActivity.this);
+			adMobAdView.setAdSize(AdSize.SMART_BANNER);
+			adMobAdView.setAdUnitId(AppConstants.MEDIATION_KEY);
+
+			adMobAdView.loadAd(adReq);
+			adMobAdView.setAdListener(new AdListener()
+			{
+				@Override
+				public void onAdLoaded()
+				{
+					adBannerLayout.setVisibility(View.VISIBLE);
+					if (adBannerLayout.getChildAt(0) != null)
+					{
+						adBannerLayout.removeViewAt(0);
+					}
+					adBannerLayout.addView(adMobAdView);
+				}
+
+				public void onAdFailedToLoad(int errorCode)
+				{
+					adBannerLayout.setVisibility(View.GONE);
+				}
+
+			});
+		}
+	}
 
 }

@@ -4,17 +4,14 @@
     <string name="app_name">找屋高手</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-	
     <string name="menu_list">資料列表</string>
     <string name="menu_map">地圖</string>
     <string name="menu_sorting">排列</string>
-    
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    
-    <string name="about_us">看屋高手利用政府實價登錄資訊，\n根據你的房屋條件，\n自動找出在附近曾經成交的案例，\n並且計算出平均價/最高價/最低價，\n還有各月的漲跌幅，輕鬆掌握房價趨勢。\n\n幫助買屋或賣屋時，能快速做決策，不吃虧！\n成為真正的看屋高手！房屋交易就是這麼容易！\n\n若有任何建議或問題.\n請利用底下的"聯絡我們"與我們聯繫</string>
-    
+    <string name="about_us">找屋高手提供您最方便的房屋搜索:\n(1) 整合最新的租.售資訊\n(2) 簡便的地圖房屋地圖搜索\n(3) 提供房屋附近設施資訊(學校, 醫院, 便利商店, 超商, 捷運...等)\n(4) 完整的租屋物件分類(整層出租, 獨立套房, 分租套房, 雅房, 店面...等)\n(5) 提供自有房屋物件管理(網站測試中)\n\n若有任何建議或問題.\n請利用底下的"聯絡我們"與我們聯繫</string>
+
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
-    
+
 </resources>

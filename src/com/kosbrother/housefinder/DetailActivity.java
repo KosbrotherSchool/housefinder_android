@@ -16,10 +16,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.kosbrother.housefinder.data.DatabaseHelper;
 import com.kosbrother.houseprice.fragment.RentDetailFragment;
 
 public class DetailActivity extends FragmentActivity
@@ -28,7 +31,8 @@ public class DetailActivity extends FragmentActivity
 	MyAdapter mAdapter;
 	ViewPager mPager;
 	private ActionBar mActionBar;
-
+	private DatabaseHelper databaseHelper = null;
+	
 	private RelativeLayout adBannerLayout;
 	private AdView adMobAdView;
 
@@ -37,10 +41,11 @@ public class DetailActivity extends FragmentActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fragment_pager);
+		setContentView(R.layout.non_scrollable_fragment_pager);
 		Bundle bundle = getIntent().getExtras();
-		int position = bundle.getInt("RowNumber");
+		int position = bundle.getInt("ItemPosition");
 
+		NUM_ITEMS = Datas.mRentHouses.size();
 
 		mAdapter = new MyAdapter(getSupportFragmentManager());
 
@@ -87,9 +92,10 @@ public class DetailActivity extends FragmentActivity
 				// TODO Auto-generated method stub
 
 			}
+			
 		});
 
-//		CallAds();
+		CallAds();
 	}
 
 	public class MyAdapter extends FragmentStatePagerAdapter
@@ -111,6 +117,7 @@ public class DetailActivity extends FragmentActivity
 			return RentDetailFragment.newInstance(position,
 					DetailActivity.this);
 		}
+		
 	}
 
 
@@ -155,7 +162,35 @@ public class DetailActivity extends FragmentActivity
 
 		return super.onCreateOptionsMenu(menu);
 	}
+	
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
 
+		/*
+		 * You'll need this in your class to release the helper when done.
+		 */
+		if (databaseHelper != null)
+		{
+			OpenHelperManager.releaseHelper();
+			databaseHelper = null;
+		}
+	}
+
+	/**
+	 * You'll need this in your class to get the helper from the manager once
+	 * per class.
+	 */
+	public DatabaseHelper getHelper()
+	{
+		if (databaseHelper == null)
+		{
+			databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+		}
+		return databaseHelper;
+	}
+	
 	private void CallAds()
 	{
 		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
@@ -165,10 +200,6 @@ public class DetailActivity extends FragmentActivity
 		{
 			adBannerLayout = (RelativeLayout) findViewById(R.id.adLayout);
 			final AdRequest adReq = new AdRequest.Builder().build();
-
-			// 12-18 17:01:12.438: I/Ads(8252): Use
-			// AdRequest.Builder.addTestDevice("A25819A64B56C65500038B8A9E7C19DD")
-			// to get test ads on this device.
 
 			adMobAdView = new AdView(DetailActivity.this);
 			adMobAdView.setAdSize(AdSize.SMART_BANNER);
@@ -195,6 +226,23 @@ public class DetailActivity extends FragmentActivity
 
 			});
 		}
+	}
+	
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+		// The rest of your onStart() code.
+		 EasyTracker.getInstance(this).activityStart(this); // Add this
+		// method.
+	}
+
+	@Override
+	public void onStop()
+	{
+		super.onStop();
+		// The rest of your onStop() code.
+		 EasyTracker.getInstance(this).activityStop(this); // Add this method.
 	}
 
 }

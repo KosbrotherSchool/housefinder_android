@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linear_info_contact"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:background="@drawable/main_rent_list_selector"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+         >
+
+        <ImageView
+            android:id="@+id/rent_list_image"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="110dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginTop="3dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/rent_list_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="家樂福旁三民路2段國泰建設大3房2廳2衛"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/marker_rent" />
+
+                <TextView
+                    android:id="@+id/rent_list_money_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="$20000元/月,5坪" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/rent_list_type_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="整層出租,1房1衛,2/4樓" />
+
+            <TextView
+                android:id="@+id/rent_list_address_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="新北市板橋區三豐路33號"
+                android:textSize="14dp"
+                android:textStyle="italic" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_info_switch"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:background="#D6D6D6"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:clickable="true"
+         >
+
+        <ImageButton
+            android:id="@+id/button_info_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/navigation_back" />
+
+        <TextView
+            android:id="@+id/text_info_nums"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:text="1 / 43"
+            android:textColor="#595959" />
+
+        <ImageButton
+            android:id="@+id/button_info_forward"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/navigation_forward" />
+    </LinearLayout>
+
+</LinearLayout>

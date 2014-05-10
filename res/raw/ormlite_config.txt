@@ -1,0 +1,54 @@
+#
+# generated on 2014/04/24 04:25:56
+#
+# --table-start--
+dataClass=com.kosbrother.housefinder.data.OrmRentHouse
+tableName=ormrenthouse
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=rent_id
+columnName=rent_id
+# --field-end--
+# --field-start--
+fieldName=title
+# --field-end--
+# --field-start--
+fieldName=promote_pic
+# --field-end--
+# --field-start--
+fieldName=price
+# --field-end--
+# --field-start--
+fieldName=address
+# --field-end--
+# --field-start--
+fieldName=rent_area
+# --field-end--
+# --field-start--
+fieldName=layer
+# --field-end--
+# --field-start--
+fieldName=total_layer
+# --field-end--
+# --field-start--
+fieldName=rooms
+# --field-end--
+# --field-start--
+fieldName=rest_rooms
+# --field-end--
+# --field-start--
+fieldName=x_long
+# --field-end--
+# --field-start--
+fieldName=y_lat
+# --field-end--
+# --field-start--
+fieldName=rent_type_id
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################

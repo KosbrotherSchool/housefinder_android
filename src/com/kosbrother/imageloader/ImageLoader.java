@@ -101,8 +101,8 @@ public class ImageLoader
 
 	private void queuePhoto(String url, ImageView imageView, int width)
 	{
-		PhotoToLoad p = new PhotoToLoad(url, imageView);
-		executorService.submit(new PhotosLoader(p));
+		FillPhotoToLoad p = new FillPhotoToLoad(url, imageView, width);
+		executorService.submit(new FillPhotosLoader(p));
 	}
 
 	public Bitmap getBitmap(String url)
@@ -211,9 +211,9 @@ public class ImageLoader
 
 		public FillPhotoToLoad(String u, ImageView i, int width)
 		{
-			url = u;
-			imageView = i;
-			width = width;
+			this.url = u;
+			this.imageView = i;
+			this.width = width;
 		}
 	}
 

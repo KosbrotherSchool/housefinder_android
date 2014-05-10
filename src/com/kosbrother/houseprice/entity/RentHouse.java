@@ -1,6 +1,6 @@
 package com.kosbrother.houseprice.entity;
 
-import android.R.integer;
+import java.util.ArrayList;
 
 public class RentHouse
 {
@@ -48,6 +48,10 @@ public class RentHouse
 	public int town_id;
 	public int rent_type_id;
 	public int building_type_id;
+	
+	public boolean is_show;
+	
+	public ArrayList<String> picArrayList;
 
 	public RentHouse(int rent_id, String title, String promote_pic, int price,
 			String address, double rent_area, int layer, int total_layer,
@@ -95,6 +99,7 @@ public class RentHouse
 		this.town_id = 0;
 		this.rent_type_id = rent_type_id;
 		this.building_type_id = 0;
+		this.picArrayList = new ArrayList<String>();
 	}
 
 	public RentHouse(int rent_id, String title, String promote_pic, int price,
@@ -106,7 +111,7 @@ public class RentHouse
 			String orientation, String furniture, String equipment,
 			String living_explanation, String communication,
 			String feature_html, String vender_name, String phone_number,
-			int county_id, int town_id, int rent_type_id, int building_type_id)
+			int county_id, int town_id, int rent_type_id, int building_type_id, boolean is_show)
 	{
 		this.rent_id = rent_id;
 		this.title = title;
@@ -150,6 +155,10 @@ public class RentHouse
 		this.town_id = town_id;
 		this.rent_type_id = rent_type_id;
 		this.building_type_id = building_type_id;
+		
+		this.is_show = is_show;
+		
+		this.picArrayList = new ArrayList<String>();
 	}
 
 }

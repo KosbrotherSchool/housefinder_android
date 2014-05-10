@@ -25,6 +25,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.ActionProvider;
@@ -35,12 +36,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -51,6 +55,8 @@ import at.bartinger.list.item.EntryItem;
 import at.bartinger.list.item.Item;
 import at.bartinger.list.item.SectionItem;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -58,6 +64,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -67,8 +74,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kosbrother.houseprice.api.HouseApi;
 import com.kosbrother.houseprice.api.InfoParserApi;
+import com.kosbrother.houseprice.entity.County;
 import com.kosbrother.houseprice.entity.RentHouse;
+import com.kosbrother.houseprice.entity.Town;
 import com.kosbrother.houseprice.fragment.TransparentSupportMapFragment;
+import com.kosbrother.imageloader.ImageLoader;
 
 @SuppressLint("NewApi")
 public class MainActivity extends FragmentActivity implements LocationListener,
@@ -81,6 +91,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 	public static boolean isReSearch = true;
 	public static boolean isBackFromFilter = false;
+	public static boolean isBackFromListFilterButton = false;
+	public static boolean isBackFromListGetLocationButton = false;
 
 	private MarkerOptions loacationMarker;
 
@@ -100,25 +112,76 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	private ArrayList<MarkerOptions> mMarkers = new ArrayList<MarkerOptions>();
 	private LayoutInflater inflater;
 
+	private TextView titleRentTextView;
+	private LinearLayout linearProgressLayout;
+	// private LinearLayout linearTitlecontentLayout;
+
+	private LinearLayout locationsButtonLayout;
+	private LinearLayout linearFilter;
+
+	private ImageButton btnFocusButton;
+	private ImageButton btnLayerButton;
+	private int currentMapTypePosition = 0;
+
+	private LinearLayout mainRentLayout;
+	private ImageLoader imageLoader;
+	private ArrayList<RentHouse> aroundRentHouses = new ArrayList<RentHouse>();
+	private ArrayList<MarkerOptions> aroudMarkers = new ArrayList<MarkerOptions>();
+	private LinearLayout linearInfoSwitch;
+	private ImageButton infoBackButton;
+	private ImageButton infoForwardbButton;
+	private TextView infoNumsTextView;
+	private int currentPosition = 0;
+	private LinearLayout linearInfoContent;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.drawer_layout);
 
+		boolean isFirstOpen = Setting.getBooleanSetting(Setting.keyFirstOpenV2,
+				this);
+		if (isFirstOpen)
+		{
+			final LinearLayout firstLinearLayout = (LinearLayout) findViewById(R.id.first_teach_layout);
+			firstLinearLayout.setVisibility(View.VISIBLE);
+			Button firstConfirButton = (Button) findViewById(R.id.first_confrim_button);
+			firstConfirButton.setOnClickListener(new OnClickListener()
+			{
+
+				@Override
+				public void onClick(View v)
+				{
+					Setting.saveBooleanSetting(Setting.keyFirstOpenV2, false,
+							MainActivity.this);
+					firstLinearLayout.setVisibility(View.GONE);
+				}
+			});
+		}
+
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
+		titleRentTextView = (TextView) findViewById(R.id.title_rent_text);
+		linearProgressLayout = (LinearLayout) findViewById(R.id.linear_title_progress);
+		locationsButtonLayout = (LinearLayout) findViewById(R.id.linear_location_button);
+		linearFilter = (LinearLayout) findViewById(R.id.linear_filter);
+		mainRentLayout = (LinearLayout) findViewById(R.id.main_rent_layout);
+		linearInfoSwitch = (LinearLayout) findViewById(R.id.linear_info_switch);
+		infoBackButton = (ImageButton) findViewById(R.id.button_info_back);
+		infoForwardbButton = (ImageButton) findViewById(R.id.button_info_forward);
+		infoNumsTextView = (TextView) findViewById(R.id.text_info_nums);
+		linearInfoContent = (LinearLayout) findViewById(R.id.linear_info_contact);
 
+		imageLoader = new ImageLoader(this, 100);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
 				GravityCompat.START);
 
 		// enable ActionBar app icon to behave as action to toggle nav drawer
 		if (Build.VERSION.SDK_INT >= 14)
 		{
-			// Toast.makeText(this, Integer.toString(Build.VERSION.SDK_INT),
-			// Toast.LENGTH_SHORT).show();
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
 		}
@@ -145,6 +208,75 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 		setDrawerLayout();
 
+		btnFocusButton = (ImageButton) findViewById(R.id.image_btn_focus);
+		btnFocusButton.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				EasyTracker easyTracker = EasyTracker
+						.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button",
+						"button_press", "focus_button", null).build());
+				getLocation(true, 1);
+			}
+		});
+
+		btnLayerButton = (ImageButton) findViewById(R.id.image_btn_layers);
+		btnLayerButton.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+
+				EasyTracker easyTracker = EasyTracker
+						.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button",
+						"button_press", "layer_button", null).build());
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						MainActivity.this);
+				// Set the dialog title
+				builder.setTitle("顯示地圖").setSingleChoiceItems(R.array.map_type,
+						currentMapTypePosition,
+						new DialogInterface.OnClickListener()
+						{
+							@Override
+							public void onClick(DialogInterface dialog,
+									int position)
+							{
+								setMapTypeByPosition(position);
+								currentMapTypePosition = position;
+								dialog.cancel();
+							}
+
+							private void setMapTypeByPosition(int position)
+							{
+								switch (position)
+								{
+								case 0:
+									mGoogleMap
+											.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+									break;
+								case 1:
+									mGoogleMap
+											.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+									break;
+								case 2:
+									mGoogleMap
+											.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+									break;
+								default:
+									break;
+								}
+
+							}
+						});
+				builder.show();
+
+			}
+		});
+
 		mLocationClient = new LocationClient(this, this, this);
 		try
 		{
@@ -156,6 +288,207 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			e.printStackTrace();
 		}
 
+		locationsButtonLayout.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View arg0)
+			{
+				EasyTracker easyTracker = EasyTracker
+						.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button",
+						"button_press", "area locations button", null).build());
+				showCountyDialog();
+
+			}
+
+			private void showCountyDialog()
+			{
+				final ArrayList<County> mCounties = HouseApi.getCounties();
+				final String[] ListStr = new String[mCounties.size()];
+				for (int i = 0; i < mCounties.size(); i++)
+				{
+					ListStr[i] = mCounties.get(i).name;
+				}
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						MainActivity.this);
+				builder.setTitle("選擇地區");
+				builder.setItems(ListStr, new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int position)
+					{
+						showTownDialog(mCounties.get(position).id);
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+
+			private void showTownDialog(int county_id)
+			{
+				final ArrayList<Town> mTowns = HouseApi
+						.getCountyTowns(county_id);
+				final String[] ListStr = new String[mTowns.size()];
+				for (int i = 0; i < mTowns.size(); i++)
+				{
+					ListStr[i] = mTowns.get(i).name;
+				}
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						MainActivity.this);
+				builder.setTitle("選擇鄉鎮");
+				builder.setItems(ListStr, new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int position)
+					{
+						AppConstants.currentLatLng = new LatLng(mTowns
+								.get(position).y_lat,
+								mTowns.get(position).x_long);
+						getLocation(false, 1);
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+
+		});
+
+		linearFilter.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				EasyTracker easyTracker = EasyTracker
+						.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button",
+						"button_press", "filter_button", null).build());
+				Intent intent = new Intent();
+				intent.setClass(MainActivity.this, FilterActivity.class);
+				startActivity(intent);
+			}
+		});
+
+		infoBackButton.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (currentPosition != 0)
+				{
+					currentPosition = currentPosition - 1;
+					setInfoWindow(currentPosition, aroundRentHouses.size());
+				} else
+				{
+					currentPosition = aroundRentHouses.size() - 1;
+					setInfoWindow(currentPosition, aroundRentHouses.size());
+				}
+
+			}
+
+		});
+
+		infoForwardbButton.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				if (currentPosition != aroundRentHouses.size() - 1)
+				{
+					currentPosition = currentPosition + 1;
+					setInfoWindow(currentPosition, aroundRentHouses.size());
+				} else
+				{
+					currentPosition = 0;
+					setInfoWindow(currentPosition, aroundRentHouses.size());
+				}
+
+			}
+		});
+
+		linearInfoContent.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				int position = Integer.valueOf(aroudMarkers
+						.get(currentPosition).getTitle());
+
+				Intent intent = new Intent(MainActivity.this,
+						DetailActivity.class);
+				Bundle bundle = new Bundle();
+				bundle.putInt("ItemPosition", position);
+				intent.putExtras(bundle);
+				startActivity(intent);
+			}
+		});
+
+	}
+
+	private void setInfoWindow(int currentPosition, int total_size)
+	{
+
+		infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
+				+ Integer.toString(total_size));
+
+		TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
+		TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
+		TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
+
+		TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
+
+		ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
+
+		imageLoader.DisplayImage(
+				aroundRentHouses.get(currentPosition).promote_pic, imageView);
+
+		textAddress.setText(aroundRentHouses.get(currentPosition).address);
+		textTitle.setText(aroundRentHouses.get(currentPosition).title);
+
+		String moneyString = "<font size=\"3\" color=\"red\">"
+				+ Integer.toString(aroundRentHouses.get(currentPosition).price)
+				+ "元/月"
+				+ "</font>"
+				+ ",&nbsp;"
+				+ "<font size=\"3\" color=\"black\">"
+				+ InfoParserApi.parseRentArea(aroundRentHouses
+						.get(currentPosition).rent_area) + "坪" + "</font>";
+		textMoney.setText(Html.fromHtml(moneyString));
+
+		String typeString = "<font size=\"3\" color=\"black\">"
+				+ InfoParserApi.parseRentType(aroundRentHouses
+						.get(currentPosition).rent_type_id);
+
+		if (InfoParserApi.parseRoomArrangement(
+				aroundRentHouses.get(currentPosition).rooms, 0,
+				aroundRentHouses.get(currentPosition).rest_rooms, 0) != "")
+		{
+			typeString = typeString
+					+ ",&nbsp;"
+					+ InfoParserApi
+							.parseRoomArrangement(
+									aroundRentHouses.get(currentPosition).rooms,
+									0,
+									aroundRentHouses.get(currentPosition).rest_rooms,
+									0);
+		}
+
+		if (InfoParserApi.parseLayers(
+				aroundRentHouses.get(currentPosition).layer,
+				aroundRentHouses.get(currentPosition).total_layer) != "")
+		{
+			typeString = typeString
+					+ ",&nbsp;"
+					+ InfoParserApi.parseLayers(
+							aroundRentHouses.get(currentPosition).layer,
+							aroundRentHouses.get(currentPosition).total_layer);
+		}
+
+		typeString = typeString + "</font>";
+
+		textRentType.setText(Html.fromHtml(typeString));
 	}
 
 	@Override
@@ -187,12 +520,13 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 												|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 										{
 
-											// EasyTracker easyTracker =
-											// EasyTracker
-											// .getInstance(MainActivity.this);
-											// easyTracker.send(MapBuilder.createEvent("Button",
-											// "button_press", "search_button",
-											// null).build());
+											EasyTracker easyTracker = EasyTracker
+													.getInstance(MainActivity.this);
+											easyTracker.send(MapBuilder
+													.createEvent("Button",
+															"button_press",
+															"search_button",
+															null).build());
 
 											String inputString = v.getText()
 													.toString();
@@ -297,6 +631,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public void onMapClick(LatLng arg0)
 	{
 		// TODO Auto-generated method stub
+		mainRentLayout.setVisibility(View.GONE);
+
 		mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(arg0));
 		AppConstants.currentLatLng = arg0;
 		mGoogleMap.clear();
@@ -316,6 +652,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	{
 		if (isReSearch)
 		{
+
 			if (isBackFromFilter)
 			{
 				getLocation(false, 0);
@@ -326,6 +663,13 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			}
 
 			isReSearch = false;
+
+		}
+
+		if (isBackFromListGetLocationButton)
+		{
+			getLocation(true, 0);
+			isBackFromListGetLocationButton = false;
 		}
 
 	}
@@ -342,15 +686,27 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	{
 		// TODO Auto-generated method stub
 		super.onStart();
-		if (!mLocationClient.isConnected())
+		EasyTracker.getInstance(this).activityStart(this);
+
+		if (isBackFromListFilterButton)
 		{
-			mLocationClient.connect();
+			Intent intent = new Intent();
+			intent.setClass(MainActivity.this, FilterActivity.class);
+			startActivity(intent);
+			isBackFromListFilterButton = false;
+		} else
+		{
+			if (!mLocationClient.isConnected())
+			{
+				mLocationClient.connect();
+			}
 		}
 	}
 
 	@Override
 	public void onStop()
 	{
+		EasyTracker.getInstance(this).activityStop(this);
 		// // If the client is connected
 		if (mLocationClient.isConnected())
 		{
@@ -453,32 +809,135 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				@Override
 				public boolean onMarkerClick(Marker marker)
 				{
-					// if (marker == null || marker.getTitle() == null)
-					// {
-					// Toast.makeText(MainActivity.this, "marker null",
-					// Toast.LENGTH_SHORT).show();
-					// return true;
-					// }
-					//
-					// Intent intent = new Intent();
-					// // String monthKey = Datas.getKeyByPosition(mPager
-					// // .getCurrentItem());
-					// intent.putExtra("MonthKey", "");
-					// try
-					// {
-					// Log.i("RowNumber", marker.getTitle().trim());
-					// intent.putExtra("RowNumber",
-					// Integer.valueOf(marker.getTitle().trim()));
-					// } catch (Exception e)
-					// {
-					// Toast.makeText(MainActivity.this, "marker error",
-					// Toast.LENGTH_SHORT).show();
-					// intent.putExtra("RowNumber", 1);
-					// }
-					//
-					// intent.setClass(MainActivity.this, DetailActivity.class);
-					// startActivity(intent);
+					if (marker == null || marker.getTitle() == null)
+					{
+						Toast.makeText(MainActivity.this, "marker null",
+								Toast.LENGTH_SHORT).show();
+						return true;
+					}
+
+					int position = Integer.valueOf(marker.getTitle());
+
+					mainRentLayout.setVisibility(View.VISIBLE);
+
+					TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
+					TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
+					TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
+
+					TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
+
+					ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
+
+					imageLoader.DisplayImage(
+							Datas.mRentHouses.get(position).promote_pic,
+							imageView);
+
+					textAddress.setText(Datas.mRentHouses.get(position).address);
+					textTitle.setText(Datas.mRentHouses.get(position).title);
+
+					String moneyString = "<font size=\"3\" color=\"red\">"
+							+ Integer.toString(Datas.mRentHouses.get(position).price)
+							+ "元/月"
+							+ "</font>"
+							+ ",&nbsp;"
+							+ "<font size=\"3\" color=\"black\">"
+							+ InfoParserApi.parseRentArea(Datas.mRentHouses
+									.get(position).rent_area) + "坪" + "</font>";
+					textMoney.setText(Html.fromHtml(moneyString));
+
+					String typeString = "<font size=\"3\" color=\"black\">"
+							+ InfoParserApi.parseRentType(Datas.mRentHouses
+									.get(position).rent_type_id);
+
+					if (InfoParserApi.parseRoomArrangement(
+							Datas.mRentHouses.get(position).rooms, 0,
+							Datas.mRentHouses.get(position).rest_rooms, 0) != "")
+					{
+						typeString = typeString
+								+ ",&nbsp;"
+								+ InfoParserApi.parseRoomArrangement(
+										Datas.mRentHouses.get(position).rooms,
+										0,
+										Datas.mRentHouses.get(position).rest_rooms,
+										0);
+					}
+
+					if (InfoParserApi.parseLayers(
+							Datas.mRentHouses.get(position).layer,
+							Datas.mRentHouses.get(position).total_layer) != "")
+					{
+						typeString = typeString
+								+ ",&nbsp;"
+								+ InfoParserApi.parseLayers(
+										Datas.mRentHouses.get(position).layer,
+										Datas.mRentHouses.get(position).total_layer);
+					}
+
+					typeString = typeString + "</font>";
+
+					textRentType.setText(Html.fromHtml(typeString));
+
+					setAroundRentHouses(position);
+
+					// Toast.makeText(
+					// MainActivity.this,
+					// "附近" + Integer.toString(aroundRentHouses.size())
+					// + "間", Toast.LENGTH_SHORT).show();
+
+					if (aroundRentHouses.size() > 1)
+					{
+						linearInfoSwitch.setVisibility(View.VISIBLE);
+					} else
+					{
+						linearInfoSwitch.setVisibility(View.GONE);
+					}
+
 					return true;
+				}
+
+				private void setAroundRentHouses(int position)
+				{
+					aroundRentHouses.clear();
+					aroudMarkers.clear();
+					RentHouse pickedRentHouse = Datas.mRentHouses.get(position);
+					Location pickedLocation = new Location("");
+					pickedLocation.setLatitude(pickedRentHouse.y_lat);
+					pickedLocation.setLongitude(pickedRentHouse.x_long);
+
+					for (int i = 0; i < Datas.mRentHouses.size(); i++)
+					{
+						RentHouse item = Datas.mRentHouses.get(i);
+						Location itemLocation = new Location("");
+						itemLocation.setLatitude(item.y_lat);
+						itemLocation.setLongitude(item.x_long);
+						float dis_meters = itemLocation
+								.distanceTo(pickedLocation);
+						if (dis_meters < 10)
+						{
+							if (item.title.equals(pickedRentHouse.title))
+							{
+								currentPosition = aroundRentHouses.size();
+							}
+							aroundRentHouses.add(item);
+							aroudMarkers.add(mMarkers.get(i));
+						}
+					}
+
+					infoNumsTextView.setText(Integer
+							.toString(currentPosition + 1)
+							+ " / "
+							+ Integer.toString(aroundRentHouses.size()));
+				}
+			});
+
+			mGoogleMap.setOnCameraChangeListener(new OnCameraChangeListener()
+			{
+
+				@Override
+				public void onCameraChange(CameraPosition arg0)
+				{
+					// TODO Auto-generated method stub
+					mainRentLayout.setVisibility(View.GONE);
 				}
 			});
 
@@ -528,6 +987,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		@Override
 		protected Void doInBackground(Void... Void)
 		{
+
+			HouseApi.getAroundAmenities("111", 25.05535, 121.4588);
+
 			try
 			{
 				Datas.mRentHouses.clear();
@@ -592,7 +1054,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			{
 
 				Datas.mRentHouseMap = getRentHouseMap(Datas.mRentHouses);
-
+				titleRentTextView.setText("出租 x "
+						+ Integer.toString(Datas.mRentHouses.size()));
 				new addMarkerTask().execute();
 
 			} else
@@ -600,10 +1063,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				// Datas.mEstates = new ArrayList<RealEstate>();
 				// Datas.mEstatesMap = getRealEstatesMap(Datas.mEstates);
 
-				// new addMarkerTask().execute();
+				new addMarkerTask().execute();
 
 				Toast.makeText(MainActivity.this, "無資料~", Toast.LENGTH_SHORT)
 						.show();
+				titleRentTextView.setText("出租 x 0");
 				// titleTextView.setText("無資料~");
 			}
 
@@ -676,13 +1140,12 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 	private void showProgress()
 	{
-		// titleTextView.setText("搜索中...");
-		// titleProgressBar.setVisibility(View.VISIBLE);
+		linearProgressLayout.setVisibility(View.VISIBLE);
 	}
 
 	private void endProgress()
 	{
-		// titleProgressBar.setVisibility(View.GONE);
+		linearProgressLayout.setVisibility(View.GONE);
 	}
 
 	private void setMapMark()
@@ -706,16 +1169,22 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			TextView markerTypeText = (TextView) layout
 					.findViewById(R.id.text_rent_type);
 
-			String rentType = InfoParserApi.parseRentType(Datas.mRentHouses.get(i).rent_type_id);
+			String rentType = InfoParserApi.parseRentType(Datas.mRentHouses
+					.get(i).rent_type_id);
 			rentType = rentType.substring(0, 1);
 			markerTypeText.setText(rentType);
 
 			// for later marker info window use
 			MarkerOptions marker = new MarkerOptions().position(newLatLng)
 					.title(Integer.toString(i));
-			markerText
-					.setText(Integer.toString(Datas.mRentHouses.get(i).price / 100)
-							+ "k");
+
+			double rentPrice = ((double) Datas.mRentHouses.get(i).price) / 1000;
+			String rentPriceString = Double.toString(rentPrice);
+			if (rentPriceString.indexOf(".0") != -1)
+			{
+				rentPriceString = rentPriceString.substring(0, rentPriceString.indexOf(".0"));
+			}
+			markerText.setText(rentPriceString + "k");
 
 			markerView.setImageResource(R.drawable.marker_rent);
 
@@ -754,8 +1223,16 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public void onBackPressed()
 	{
 		// TODO Auto-generated method stub
-		super.onBackPressed();
-		isReSearch = true;
+
+		if (mainRentLayout.getVisibility() == View.VISIBLE)
+		{
+			mainRentLayout.setVisibility(View.GONE);
+		} else
+		{
+			super.onBackPressed();
+			isReSearch = true;
+			// finish();
+		}
 	}
 
 	private boolean servicesConnected()
@@ -840,13 +1317,14 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	private void setDrawerLayout()
 	{
 
-		items.add(new SectionItem("實價登錄搜尋"));
+		items.add(new SectionItem("房屋搜尋"));
 		items.add(new EntryItem("位置附近", R.drawable.icon_access_location));
 		items.add(new EntryItem("條件篩選", R.drawable.icon_filter));
+		items.add(new EntryItem("我的最愛", R.drawable.icon_favorite));
 		items.add(new SectionItem("房貸計算"));
 		items.add(new EntryItem("房貸計算機", R.drawable.icon_calculator));
 		items.add(new SectionItem("其他"));
-		items.add(new EntryItem("推薦", R.drawable.icon_recommend));
+		items.add(new EntryItem("分享", R.drawable.icon_recommend));
 		items.add(new EntryItem("給評(星星)", R.drawable.icon_star3));
 		items.add(new EntryItem("關於我們", R.drawable.icon_about));
 
@@ -864,70 +1342,82 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 					switch (position)
 					{
 					case 1:
-						// EasyTracker easyTracker = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker.send(MapBuilder.createEvent("Button",
-						// "button_press", "focus_button2", null).build());
+						EasyTracker easyTracker = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker.send(MapBuilder.createEvent("Button",
+								"button_press", "focus_button2", null).build());
 						getLocation(true, 1);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 2:
-						// EasyTracker easyTracker2 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker2
-						// .send(MapBuilder.createEvent("Button",
-						// "button_press", "filter_button2", null)
-						// .build());
+						EasyTracker easyTracker2 = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker2
+								.send(MapBuilder.createEvent("Button",
+										"button_press", "filter_button2", null)
+										.build());
 						Intent intent = new Intent();
 						intent.setClass(MainActivity.this, FilterActivity.class);
 						startActivity(intent);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
-					case 4:
-						// EasyTracker easyTracker3 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker3.send(MapBuilder.createEvent("Button",
-						// "button_press", "calculator_button", null)
-						// .build());
+					case 3:
+						EasyTracker easyTrackerF = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTrackerF.send(MapBuilder.createEvent("Button",
+								"button_press", "Favorite_button", null)
+								.build());
+						Intent intentFavorite = new Intent();
+						intentFavorite.setClass(MainActivity.this,
+								FavoriteActivity.class);
+						startActivity(intentFavorite);
+						mDrawerLayout.closeDrawer(leftDrawer);
+						break;
+					case 5:
+						EasyTracker easyTracker3 = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker3.send(MapBuilder.createEvent("Button",
+								"button_press", "calculator_button", null)
+								.build());
 
 						Intent intent2 = new Intent(MainActivity.this,
 								CalculatorActivity.class);
 						startActivity(intent2);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
-					case 6:
+					case 7:
 						Intent intent3 = new Intent(Intent.ACTION_SEND);
 						intent3.setType("text/plain");
 						intent3.putExtra(Intent.EXTRA_TEXT,
-								"看屋高手 https://play.google.com/store/apps/details?id=com.kosbrother.houseprice");
+								"找屋高手 https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						startActivity(Intent.createChooser(intent3, "Share..."));
 
-						// EasyTracker easyTracker4 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker4.send(MapBuilder.createEvent("Button",
-						// "button_press", "share_button", null).build());
-						break;
-					case 7:
-						// EasyTracker easyTracker5 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker5.send(MapBuilder.createEvent("Button",
-						// "button_press", "star_button", null).build());
-
-						Uri uri = Uri
-								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.houseprice");
-						Intent it = new Intent(Intent.ACTION_VIEW, uri);
-						startActivity(it);
-						Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
-								MainActivity.this);
-						Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
-								false, MainActivity.this);
+						EasyTracker easyTracker4 = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker4.send(MapBuilder.createEvent("Button",
+								"button_press", "share_button", null).build());
 						break;
 					case 8:
+						EasyTracker easyTracker5 = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker5.send(MapBuilder.createEvent("Button",
+								"button_press", "star_button", null).build());
+
+						Uri uri = Uri
+								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
+						Intent it = new Intent(Intent.ACTION_VIEW, uri);
+						startActivity(it);
+						// Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
+						// MainActivity.this);
+						// Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
+						// false, MainActivity.this);
+						break;
+					case 9:
 						// about us
-						// EasyTracker easyTracker6 = EasyTracker
-						// .getInstance(MainActivity.this);
-						// easyTracker6.send(MapBuilder.createEvent("Button",
-						// "button_press", "about_button", null).build());
+						EasyTracker easyTracker6 = EasyTracker
+								.getInstance(MainActivity.this);
+						easyTracker6.send(MapBuilder.createEvent("Button",
+								"button_press", "about_button", null).build());
 
 						Intent intent5 = new Intent(MainActivity.this,
 								AboutUsActivity.class);

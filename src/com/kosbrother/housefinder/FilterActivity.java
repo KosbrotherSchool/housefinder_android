@@ -18,10 +18,10 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
@@ -31,40 +31,28 @@ public class FilterActivity extends FragmentActivity
 {
 	private ActionBar mActionBar;
 
-	private String stringPurpose = "";
 	private String minHousePriceString = "";
 	private String maxHousePriceString = "";
-	private String stringGroundType = "";
-	private String stringBuildingType = "";
+	private String stringRentType = "";
 	private String areaMinString = "";
 	private String areaMaxString = "";
 
 	private EditText lowHousePriceEditText;
 	private EditText highHousePriceEditText;
 
-	private RadioButton radioBuy;
-	private RadioButton radioSell;
-
-	private CheckBox ground_type_0;
-	private CheckBox ground_type_1;
-	private CheckBox ground_type_2;
-	private CheckBox ground_type_3;
-	private CheckBox ground_type_4;
-	private CheckBox ground_type_5;
-
-	private CheckBox building_type_0;
-	private CheckBox building_type_a;
-	private CheckBox building_type_b;
-	private CheckBox building_type_c;
-	private CheckBox building_type_d;
-	private CheckBox building_type_e;
-	private CheckBox building_type_f;
-	private CheckBox building_type_g;
-	private CheckBox building_type_h;
-	private CheckBox building_type_i;
-	private CheckBox building_type_j;
-	private CheckBox building_type_k;
-	private CheckBox building_type_l;
+	private CheckBox rent_type_0;
+	private CheckBox rent_type_1;
+	private CheckBox rent_type_2;
+	private CheckBox rent_type_3;
+	private CheckBox rent_type_4;
+	private CheckBox rent_type_5;
+	private CheckBox rent_type_6;
+	private CheckBox rent_type_7;
+	private CheckBox rent_type_8;
+	private CheckBox rent_type_9;
+	private CheckBox rent_type_10;
+	private CheckBox rent_type_11;
+	private CheckBox rent_type_12;
 
 	private EditText areaMinEditText;
 	private EditText areaMaxEditText;
@@ -72,11 +60,10 @@ public class FilterActivity extends FragmentActivity
 	private Button buttonSearch;
 	// private Button buttonSetOften;
 
-	private ImageView groundInfoImageView;
-	private ImageView buildInfoImageView;
+	private ImageView rentInfoImageView;
 
-	private RelativeLayout adBannerLayout;
-	private AdView adMobAdView;
+	 private RelativeLayout adBannerLayout;
+	 private AdView adMobAdView;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -96,10 +83,9 @@ public class FilterActivity extends FragmentActivity
 		highHousePriceEditText = (EditText) findViewById(R.id.high_house_price_edit);
 		buttonSearch = (Button) findViewById(R.id.button_search);
 
-		groundInfoImageView = (ImageView) findViewById(R.id.ground_info_image);
-		buildInfoImageView = (ImageView) findViewById(R.id.build_info_image);
+		rentInfoImageView = (ImageView) findViewById(R.id.ground_info_image);
 
-		groundInfoImageView.setOnClickListener(new OnClickListener()
+		rentInfoImageView.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
@@ -111,36 +97,8 @@ public class FilterActivity extends FragmentActivity
 				LayoutInflater inflater = FilterActivity.this
 						.getLayoutInflater();
 
-				dialog.setTitle("房地型態(可復選)");
-				dialog.setView(inflater.inflate(R.layout.dialog_ground_info,
-						null));
-				dialog.setPositiveButton("確定",
-						new DialogInterface.OnClickListener()
-						{
-							public void onClick(
-									DialogInterface dialoginterface, int i)
-							{
-
-							}
-						});
-				dialog.show();
-
-			}
-		});
-
-		buildInfoImageView.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				AlertDialog.Builder dialog = new AlertDialog.Builder(
-						FilterActivity.this);
-
-				LayoutInflater inflater = FilterActivity.this
-						.getLayoutInflater();
-				dialog.setTitle("建物型態(可復選)");
-				dialog.setView(inflater.inflate(R.layout.dialog_build_info,
+				dialog.setTitle("出租型態(可覆選)");
+				dialog.setView(inflater.inflate(R.layout.dialog_rent_type_info,
 						null));
 				dialog.setPositiveButton("確定",
 						new DialogInterface.OnClickListener()
@@ -163,17 +121,6 @@ public class FilterActivity extends FragmentActivity
 			{
 				MainActivity.isReSearch = true;
 				MainActivity.isBackFromFilter = true;
-				// purpose
-				String valuePurpose = "";
-				if (radioBuy.isChecked())
-				{
-					valuePurpose = "0";
-				} else
-				{
-					valuePurpose = "1";
-				}
-				Setting.saveSetting(Setting.keyPurpose, valuePurpose,
-						FilterActivity.this);
 
 				// low house price
 				if (!lowHousePriceEditText.getText().toString().equals(""))
@@ -184,7 +131,8 @@ public class FilterActivity extends FragmentActivity
 				} else
 				{
 					Setting.saveSetting(Setting.keyRentHousePriceMin,
-							Setting.initialRentHousePriceMin, FilterActivity.this);
+							Setting.initialRentHousePriceMin,
+							FilterActivity.this);
 				}
 
 				// high house price
@@ -196,35 +144,64 @@ public class FilterActivity extends FragmentActivity
 				} else
 				{
 					Setting.saveSetting(Setting.keyRentHousePriceMax,
-							Setting.initialRentHousePriceMax, FilterActivity.this);
+							Setting.initialRentHousePriceMax,
+							FilterActivity.this);
 				}
 
 				// ground type
 				String valueGroundType = "";
-				if (ground_type_0.isChecked())
+				if (rent_type_0.isChecked())
 				{
 					valueGroundType = "0";
 				} else
 				{
-					if (ground_type_1.isChecked())
+					if (rent_type_1.isChecked())
 					{
-						valueGroundType = valueGroundType + "1";
+						valueGroundType = valueGroundType + "a";
 					}
-					if (ground_type_2.isChecked())
+					if (rent_type_2.isChecked())
 					{
-						valueGroundType = valueGroundType + "2";
+						valueGroundType = valueGroundType + "b";
 					}
-					if (ground_type_3.isChecked())
+					if (rent_type_3.isChecked())
 					{
-						valueGroundType = valueGroundType + "3";
+						valueGroundType = valueGroundType + "c";
 					}
-					if (ground_type_4.isChecked())
+					if (rent_type_4.isChecked())
 					{
-						valueGroundType = valueGroundType + "4";
+						valueGroundType = valueGroundType + "d";
 					}
-					if (ground_type_5.isChecked())
+					if (rent_type_5.isChecked())
 					{
-						valueGroundType = valueGroundType + "5";
+						valueGroundType = valueGroundType + "e";
+					}
+					if (rent_type_6.isChecked())
+					{
+						valueGroundType = valueGroundType + "f";
+					}
+					if (rent_type_7.isChecked())
+					{
+						valueGroundType = valueGroundType + "g";
+					}
+					if (rent_type_8.isChecked())
+					{
+						valueGroundType = valueGroundType + "h";
+					}
+					if (rent_type_9.isChecked())
+					{
+						valueGroundType = valueGroundType + "i";
+					}
+					if (rent_type_10.isChecked())
+					{
+						valueGroundType = valueGroundType + "j";
+					}
+					if (rent_type_11.isChecked())
+					{
+						valueGroundType = valueGroundType + "k";
+					}
+					if (rent_type_12.isChecked())
+					{
+						valueGroundType = valueGroundType + "l";
 					}
 				}
 
@@ -236,85 +213,6 @@ public class FilterActivity extends FragmentActivity
 				{
 					Setting.saveSetting(Setting.keyRentType, valueGroundType,
 							FilterActivity.this);
-				}
-
-				// buiding type
-				String valueBuildingType = "";
-				if (building_type_0.isChecked())
-				{
-					valueBuildingType = "0";
-				} else
-				{
-
-					if (building_type_a.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "a";
-					}
-
-					if (building_type_b.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "b";
-					}
-
-					if (building_type_c.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "c";
-					}
-
-					if (building_type_d.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "d";
-					}
-
-					if (building_type_e.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "e";
-					}
-
-					if (building_type_f.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "f";
-					}
-
-					if (building_type_g.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "g";
-					}
-
-					if (building_type_h.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "h";
-					}
-
-					if (building_type_i.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "i";
-					}
-
-					if (building_type_j.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "j";
-					}
-
-					if (building_type_k.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "k";
-					}
-
-					if (building_type_l.isChecked())
-					{
-						valueBuildingType = valueBuildingType + "l";
-					}
-				}
-
-				if (valueBuildingType.equals(""))
-				{
-					Toast.makeText(FilterActivity.this, "請選擇建物形態",
-							Toast.LENGTH_SHORT).show();
-				} else
-				{
-					Setting.saveSetting(Setting.keyBuildingType,
-							valueBuildingType, FilterActivity.this);
 				}
 
 				// min square price
@@ -343,35 +241,32 @@ public class FilterActivity extends FragmentActivity
 			}
 		});
 
-		radioBuy = (RadioButton) findViewById(R.id.radio_buy);
-		radioSell = (RadioButton) findViewById(R.id.radio_sell);
+		rent_type_0 = (CheckBox) findViewById(R.id.rent_type_0);
+		rent_type_1 = (CheckBox) findViewById(R.id.rent_type_1);
+		rent_type_2 = (CheckBox) findViewById(R.id.rent_type_2);
+		rent_type_3 = (CheckBox) findViewById(R.id.rent_type_3);
+		rent_type_4 = (CheckBox) findViewById(R.id.rent_type_4);
+		rent_type_5 = (CheckBox) findViewById(R.id.rent_type_5);
+		rent_type_6 = (CheckBox) findViewById(R.id.rent_type_6);
+		rent_type_7 = (CheckBox) findViewById(R.id.rent_type_7);
+		rent_type_8 = (CheckBox) findViewById(R.id.rent_type_8);
+		rent_type_9 = (CheckBox) findViewById(R.id.rent_type_9);
+		rent_type_10 = (CheckBox) findViewById(R.id.rent_type_10);
+		rent_type_11 = (CheckBox) findViewById(R.id.rent_type_11);
+		rent_type_12 = (CheckBox) findViewById(R.id.rent_type_12);
 
-		ground_type_0 = (CheckBox) findViewById(R.id.ground_type_0);
-		ground_type_1 = (CheckBox) findViewById(R.id.ground_type_1);
-		ground_type_2 = (CheckBox) findViewById(R.id.ground_type_2);
-		ground_type_3 = (CheckBox) findViewById(R.id.ground_type_3);
-		ground_type_4 = (CheckBox) findViewById(R.id.ground_type_4);
-		ground_type_5 = (CheckBox) findViewById(R.id.ground_type_5);
-
-		building_type_0 = (CheckBox) findViewById(R.id.building_type_0);
-		building_type_a = (CheckBox) findViewById(R.id.building_type_a);
-		building_type_b = (CheckBox) findViewById(R.id.building_type_b);
-		building_type_c = (CheckBox) findViewById(R.id.building_type_c);
-		building_type_d = (CheckBox) findViewById(R.id.building_type_d);
-		building_type_e = (CheckBox) findViewById(R.id.building_type_e);
-		building_type_f = (CheckBox) findViewById(R.id.building_type_f);
-		building_type_g = (CheckBox) findViewById(R.id.building_type_g);
-		building_type_h = (CheckBox) findViewById(R.id.building_type_h);
-		building_type_i = (CheckBox) findViewById(R.id.building_type_i);
-		building_type_j = (CheckBox) findViewById(R.id.building_type_j);
-		building_type_k = (CheckBox) findViewById(R.id.building_type_k);
-		building_type_l = (CheckBox) findViewById(R.id.building_type_l);
-
-		setCheckAllGroundType(ground_type_1);
-		setCheckAllGroundType(ground_type_2);
-		setCheckAllGroundType(ground_type_3);
-		setCheckAllGroundType(ground_type_4);
-		setCheckAllGroundType(ground_type_5);
+		setCheckAllRentType(rent_type_1);
+		setCheckAllRentType(rent_type_2);
+		setCheckAllRentType(rent_type_3);
+		setCheckAllRentType(rent_type_4);
+		setCheckAllRentType(rent_type_5);
+		setCheckAllRentType(rent_type_6);
+		setCheckAllRentType(rent_type_7);
+		setCheckAllRentType(rent_type_8);
+		setCheckAllRentType(rent_type_9);
+		setCheckAllRentType(rent_type_10);
+		setCheckAllRentType(rent_type_11);
+		setCheckAllRentType(rent_type_12);
 
 		areaMinEditText = (EditText) findViewById(R.id.area_min);
 		areaMaxEditText = (EditText) findViewById(R.id.area_max);
@@ -383,24 +278,15 @@ public class FilterActivity extends FragmentActivity
 			mActionBar.setDisplayHomeAsUpEnabled(true);
 			mActionBar.setHomeButtonEnabled(true);
 		}
-		stringPurpose = Setting.getSetting(Setting.keyPurpose, this);
-		minHousePriceString = Setting
-				.getSetting(Setting.keyRentHousePriceMin, this);
-		maxHousePriceString = Setting
-				.getSetting(Setting.keyRentHousePriceMax, this);
 
-		stringGroundType = Setting.getSetting(Setting.keyRentType, this);
-		stringBuildingType = Setting.getSetting(Setting.keyBuildingType, this);
+		minHousePriceString = Setting.getSetting(Setting.keyRentHousePriceMin,
+				this);
+		maxHousePriceString = Setting.getSetting(Setting.keyRentHousePriceMax,
+				this);
+
+		stringRentType = Setting.getSetting(Setting.keyRentType, this);
 		areaMinString = Setting.getSetting(Setting.keyAreaMin, this);
 		areaMaxString = Setting.getSetting(Setting.keyAreaMax, this);
-
-		if (stringPurpose.equals("0"))
-		{
-			radioBuy.setChecked(true);
-		} else
-		{
-			radioSell.setChecked(true);
-		}
 
 		if (minHousePriceString.equals("0"))
 		{
@@ -418,136 +304,74 @@ public class FilterActivity extends FragmentActivity
 			highHousePriceEditText.setText(maxHousePriceString);
 		}
 
-		if (stringGroundType.equals("0"))
+		if (stringRentType.equals("0"))
 		{
-			ground_type_0.setChecked(true);
-			ground_type_1.setChecked(true);
-			ground_type_2.setChecked(true);
-			ground_type_3.setChecked(true);
-			ground_type_4.setChecked(true);
-			ground_type_5.setChecked(true);
+			rent_type_0.setChecked(true);
+			rent_type_1.setChecked(true);
+			rent_type_2.setChecked(true);
+			rent_type_3.setChecked(true);
+			rent_type_4.setChecked(true);
+			rent_type_5.setChecked(true);
+			rent_type_6.setChecked(true);
+			rent_type_7.setChecked(true);
+			rent_type_8.setChecked(true);
+			rent_type_9.setChecked(true);
+			rent_type_10.setChecked(true);
+			rent_type_11.setChecked(true);
+			rent_type_12.setChecked(true);
 
 		} else
 		{
 
-			ground_type_0.setChecked(false);
-			setChecked(stringGroundType, ground_type_1, "1");
-			setChecked(stringGroundType, ground_type_2, "2");
-			setChecked(stringGroundType, ground_type_3, "3");
-			setChecked(stringGroundType, ground_type_4, "4");
-			setChecked(stringGroundType, ground_type_5, "5");
+			rent_type_0.setChecked(false);
+			setChecked(stringRentType, rent_type_1, "a");
+			setChecked(stringRentType, rent_type_2, "b");
+			setChecked(stringRentType, rent_type_3, "c");
+			setChecked(stringRentType, rent_type_4, "d");
+			setChecked(stringRentType, rent_type_5, "e");
+			setChecked(stringRentType, rent_type_6, "f");
+			setChecked(stringRentType, rent_type_7, "g");
+			setChecked(stringRentType, rent_type_8, "h");
+			setChecked(stringRentType, rent_type_9, "i");
+			setChecked(stringRentType, rent_type_10, "j");
+			setChecked(stringRentType, rent_type_11, "k");
+			setChecked(stringRentType, rent_type_12, "l");
 		}
 
-		ground_type_0.setOnClickListener(new OnClickListener()
+		rent_type_0.setOnClickListener(new OnClickListener()
 		{
 
 			@Override
 			public void onClick(View v)
 			{
-				if (ground_type_0.isChecked())
+				if (rent_type_0.isChecked())
 				{
-					ground_type_1.setChecked(true);
-					ground_type_2.setChecked(true);
-					ground_type_3.setChecked(true);
-					ground_type_4.setChecked(true);
-					ground_type_5.setChecked(true);
+					rent_type_1.setChecked(true);
+					rent_type_2.setChecked(true);
+					rent_type_3.setChecked(true);
+					rent_type_4.setChecked(true);
+					rent_type_5.setChecked(true);
+					rent_type_6.setChecked(true);
+					rent_type_7.setChecked(true);
+					rent_type_8.setChecked(true);
+					rent_type_9.setChecked(true);
+					rent_type_10.setChecked(true);
+					rent_type_11.setChecked(true);
+					rent_type_12.setChecked(true);
 				} else
 				{
-					ground_type_1.setChecked(false);
-					ground_type_2.setChecked(false);
-					ground_type_3.setChecked(false);
-					ground_type_4.setChecked(false);
-					ground_type_5.setChecked(false);
-				}
-
-			}
-		});
-
-		setCheckAllGroundType(ground_type_1);
-		setCheckAllGroundType(ground_type_2);
-		setCheckAllGroundType(ground_type_3);
-		setCheckAllGroundType(ground_type_4);
-		setCheckAllGroundType(ground_type_5);
-
-		if (stringBuildingType.equals("0"))
-		{
-			building_type_0.setChecked(true);
-			building_type_a.setChecked(true);
-			building_type_b.setChecked(true);
-			building_type_c.setChecked(true);
-			building_type_d.setChecked(true);
-			building_type_e.setChecked(true);
-			building_type_f.setChecked(true);
-			building_type_g.setChecked(true);
-			building_type_h.setChecked(true);
-			building_type_i.setChecked(true);
-			building_type_j.setChecked(true);
-			building_type_k.setChecked(true);
-			building_type_l.setChecked(true);
-		} else
-		{
-			building_type_0.setChecked(false);
-			setChecked(stringBuildingType, building_type_a, "a");
-			setChecked(stringBuildingType, building_type_b, "b");
-			setChecked(stringBuildingType, building_type_c, "c");
-			setChecked(stringBuildingType, building_type_d, "d");
-			setChecked(stringBuildingType, building_type_e, "e");
-			setChecked(stringBuildingType, building_type_f, "f");
-			setChecked(stringBuildingType, building_type_g, "g");
-			setChecked(stringBuildingType, building_type_h, "h");
-			setChecked(stringBuildingType, building_type_i, "i");
-			setChecked(stringBuildingType, building_type_j, "j");
-			setChecked(stringBuildingType, building_type_k, "k");
-			setChecked(stringBuildingType, building_type_l, "l");
-		}
-
-		setCheckAllBuildingType(building_type_a);
-		setCheckAllBuildingType(building_type_b);
-		setCheckAllBuildingType(building_type_c);
-		setCheckAllBuildingType(building_type_d);
-		setCheckAllBuildingType(building_type_e);
-		setCheckAllBuildingType(building_type_f);
-		setCheckAllBuildingType(building_type_g);
-		setCheckAllBuildingType(building_type_h);
-		setCheckAllBuildingType(building_type_i);
-		setCheckAllBuildingType(building_type_j);
-		setCheckAllBuildingType(building_type_k);
-		setCheckAllBuildingType(building_type_l);
-
-		building_type_0.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				if (building_type_0.isChecked())
-				{
-					building_type_a.setChecked(true);
-					building_type_b.setChecked(true);
-					building_type_c.setChecked(true);
-					building_type_d.setChecked(true);
-					building_type_e.setChecked(true);
-					building_type_f.setChecked(true);
-					building_type_g.setChecked(true);
-					building_type_h.setChecked(true);
-					building_type_i.setChecked(true);
-					building_type_j.setChecked(true);
-					building_type_k.setChecked(true);
-					building_type_l.setChecked(true);
-				} else
-				{
-					building_type_a.setChecked(false);
-					building_type_b.setChecked(false);
-					building_type_c.setChecked(false);
-					building_type_d.setChecked(false);
-					building_type_e.setChecked(false);
-					building_type_f.setChecked(false);
-					building_type_g.setChecked(false);
-					building_type_h.setChecked(false);
-					building_type_i.setChecked(false);
-					building_type_j.setChecked(false);
-					building_type_k.setChecked(false);
-					building_type_l.setChecked(false);
+					rent_type_1.setChecked(false);
+					rent_type_2.setChecked(false);
+					rent_type_3.setChecked(false);
+					rent_type_4.setChecked(false);
+					rent_type_5.setChecked(false);
+					rent_type_6.setChecked(false);
+					rent_type_7.setChecked(false);
+					rent_type_8.setChecked(false);
+					rent_type_9.setChecked(false);
+					rent_type_10.setChecked(false);
+					rent_type_11.setChecked(false);
+					rent_type_12.setChecked(false);
 				}
 
 			}
@@ -569,7 +393,7 @@ public class FilterActivity extends FragmentActivity
 			areaMaxEditText.setText(areaMaxString);
 		}
 
-		CallAds();
+		 CallAds();
 
 	}
 
@@ -587,9 +411,9 @@ public class FilterActivity extends FragmentActivity
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void setCheckAllBuildingType(CheckBox building_type)
+	private void setCheckAllRentType(CheckBox rent_check_box)
 	{
-		building_type.setOnCheckedChangeListener(new OnCheckedChangeListener()
+		rent_check_box.setOnCheckedChangeListener(new OnCheckedChangeListener()
 		{
 
 			@Override
@@ -598,53 +422,23 @@ public class FilterActivity extends FragmentActivity
 			{
 				if (isChecked)
 				{
-					if (building_type_a.isChecked()
-							&& building_type_b.isChecked()
-							&& building_type_c.isChecked()
-							&& building_type_d.isChecked()
-							&& building_type_e.isChecked()
-							&& building_type_f.isChecked()
-							&& building_type_g.isChecked()
-							&& building_type_h.isChecked()
-							&& building_type_i.isChecked()
-							&& building_type_j.isChecked()
-							&& building_type_k.isChecked()
-							&& building_type_l.isChecked())
+					if (rent_type_1.isChecked() && rent_type_2.isChecked()
+							&& rent_type_3.isChecked()
+							&& rent_type_4.isChecked()
+							&& rent_type_5.isChecked()
+							&& rent_type_6.isChecked()
+							&& rent_type_7.isChecked()
+							&& rent_type_8.isChecked()
+							&& rent_type_9.isChecked()
+							&& rent_type_10.isChecked()
+							&& rent_type_11.isChecked()
+							&& rent_type_12.isChecked())
 					{
-						building_type_0.setChecked(true);
-					}
-
-				} else
-				{
-					building_type_0.setChecked(false);
-				}
-
-			}
-		});
-
-	}
-
-	private void setCheckAllGroundType(CheckBox ground_type)
-	{
-		ground_type.setOnCheckedChangeListener(new OnCheckedChangeListener()
-		{
-
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked)
-			{
-				if (isChecked)
-				{
-					if (ground_type_1.isChecked() && ground_type_2.isChecked()
-							&& ground_type_3.isChecked()
-							&& ground_type_4.isChecked()
-							&& ground_type_5.isChecked())
-					{
-						ground_type_0.setChecked(true);
+						rent_type_0.setChecked(true);
 					}
 				} else
 				{
-					ground_type_0.setChecked(false);
+					rent_type_0.setChecked(false);
 				}
 
 			}
@@ -750,14 +544,15 @@ public class FilterActivity extends FragmentActivity
 	public void onStart()
 	{
 		super.onStart();
-//		EasyTracker.getInstance(this).activityStart(this); // Add this method.
+		 EasyTracker.getInstance(this).activityStart(this); // Add this
+		// method.
 	}
 
 	@Override
 	public void onStop()
 	{
 		super.onStop();
-//		EasyTracker.getInstance(this).activityStop(this); // Add this method.
+		 EasyTracker.getInstance(this).activityStop(this); // Add this method.
 	}
 
 }

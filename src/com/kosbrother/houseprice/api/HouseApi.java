@@ -9,19 +9,37 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.kosbrother.housefinder.Datas;
+import com.kosbrother.houseprice.entity.County;
+import com.kosbrother.houseprice.entity.LandMark;
 import com.kosbrother.houseprice.entity.RentHouse;
+import com.kosbrother.houseprice.entity.Town;
 
 public class HouseApi
 {
 	final static String HOST = "http://106.186.31.71";
 	public static final String TAG = "HOUSE_API";
 	public static final boolean DEBUG = true;
+
+	public static ArrayList<County> getCounties()
+	{
+		return County.getCounties();
+	}
+
+	public static ArrayList<Town> getCountyTowns(int county_id)
+	{
+		return Town.getTonwsByCounty(county_id);
+	}
 
 	public static ArrayList<RentHouse> getAroundRentsByAreas(double km_dis,
 			double center_x, double center_y, String rp_min, String rp_max,
@@ -374,6 +392,15 @@ public class HouseApi
 				// TODO: handle exception
 			}
 
+			boolean is_show = true;
+			try
+			{
+				is_show = jArray.getJSONObject(0).getBoolean("is_show");
+			} catch (Exception e)
+			{
+				// TODO: handle exception
+			}
+
 			RentHouse newHouse = new RentHouse(rent_id, title, promote_pic,
 					price, address, deposit, rent_area, layer, total_layer,
 					rooms, living_rooms, rest_rooms, balconies, parkingString,
@@ -381,7 +408,15 @@ public class HouseApi
 					is_pet, identity, sexual_restriction, orientation,
 					furniture, equipment, living_explanation, communication,
 					feature_html, vender_name, phone_number, county_id,
-					town_id, rent_type_id, building_type_id);
+					town_id, rent_type_id, building_type_id, is_show);
+
+			JSONArray jArrayPics = jArray.getJSONArray(1);
+			for (int i = 0; i < jArrayPics.length(); i++)
+			{
+				String picLink = jArrayPics.getJSONObject(i).getString(
+						"picture_link");
+				newHouse.picArrayList.add(picLink);
+			}
 
 			return newHouse;
 		} catch (Exception e)
@@ -509,12 +544,13 @@ public class HouseApi
 
 				double x_long = jArray.getJSONObject(i).getDouble("x_long");
 				double y_lat = jArray.getJSONObject(i).getDouble("y_lat");
-				
-//				public RentHouse(int rent_id, String title, String promote_pic, int price,
-//						String address, double rent_area, int layer, int total_layer,
-//						int rooms, int rest_rooms, double x_long, double y_lat,
-//						int rent_type_id)
-				
+
+				// public RentHouse(int rent_id, String title, String
+				// promote_pic, int price,
+				// String address, double rent_area, int layer, int total_layer,
+				// int rooms, int rest_rooms, double x_long, double y_lat,
+				// int rent_type_id)
+
 				RentHouse newHouse = new RentHouse(rent_id, title, promote_pic,
 						price, address, rent_area, layer, total_layer, rooms,
 						rest_rooms, x_long, y_lat, rent_type_id);
@@ -530,6 +566,98 @@ public class HouseApi
 		Log.i(TAG, "End   Parse Json:" + System.currentTimeMillis() + " array ");
 		return rentHouses;
 
+	}
+
+	// HouseApi.getAroundAmenities("111", 25.05535, 121.4588);
+	public static ArrayList<LandMark> getAroundAmenities(String unique_id,
+			double x_lat, double y_lng)
+	{
+		String landMarks_url = "http://api.housebook.tw/api/landmarks?";
+		landMarks_url = landMarks_url + "unique_id=" + unique_id + "&lat="
+				+ Double.toString(x_lat) + "&lng=" + Double.toString(y_lng);
+		String message = httpPOST(landMarks_url);
+		ArrayList<LandMark> landMarks = new ArrayList<LandMark>();
+		if (message == null)
+		{
+			return null;
+		} else
+		{
+			return parseLandMarksMessage(message, landMarks);
+		}
+
+	}
+
+	private static ArrayList<LandMark> parseLandMarksMessage(String message,
+			ArrayList<LandMark> landMarks)
+	{
+		try
+		{
+			JSONArray jArray;
+			JSONObject jObject = new JSONObject(message.toString());
+			jArray = jObject.getJSONArray("ApiResult");
+			// jArray = new JSONArray(message.toString());
+			for (int i = 0; i < jArray.length(); i++)
+			{
+				int landMark_id = 0;
+				try
+				{
+					landMark_id = jArray.getJSONObject(i).getInt("id");
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				int type_id = 0;
+				try
+				{
+					 String type = jArray.getJSONObject(i).getString("type");
+					 type_id = LandMark.parseType(type);
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				String title = "";
+				try
+				{
+					title = jArray.getJSONObject(i).getString("title");
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				double y_lat = 0;
+				try
+				{
+					y_lat = jArray.getJSONObject(i).getDouble("lat");
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				double x_lng = 0;
+				try
+				{
+					x_lng = jArray.getJSONObject(i).getDouble("lng");
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				int dis_meter = 0;
+				try
+				{
+					dis_meter = jArray.getJSONObject(i).getInt("distance");
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+				}
+				
+				LandMark newLandMark = new LandMark(landMark_id, type_id,
+						title, x_lng, y_lat, dis_meter);
+				landMarks.add(newLandMark);
+			}
+			
+		} catch (Exception e1)
+		{
+			e1.printStackTrace();
+		}
+		return landMarks;
 	}
 
 	public static String getMessageFromServer(String requestMethod,
@@ -599,6 +727,30 @@ public class HouseApi
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	private static String httpPOST(String url)
+	{
+		HttpPost post = new HttpPost(url);
+		try
+		{
+			// 送出HTTP request
+			// post.setEntity(new UrlEncodedFormEntity(null, HTTP.UTF_8));
+			// 取得HTTP response
+			HttpResponse httpResponse = new DefaultHttpClient().execute(post);
+			// 檢查狀態碼，200表示OK
+			if (httpResponse.getStatusLine().getStatusCode() == 200)
+			{
+				// 取出回應字串
+				String strResult = EntityUtils.toString(httpResponse
+						.getEntity());
+				return strResult;
+			}
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

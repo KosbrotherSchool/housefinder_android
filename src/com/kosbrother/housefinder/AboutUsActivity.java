@@ -36,7 +36,7 @@ public class AboutUsActivity extends Activity
 				emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
 						new String[] { "kosbrotherschool@gmail.com" });
 				emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
-						"聯絡我們 from 實價登錄");
+						"聯絡我們 from 找屋高手");
 				emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
 				startActivity(Intent.createChooser(emailIntent, "Send mail..."));
 			}

@@ -21,7 +21,7 @@ public class AppConstants
 //	public static double saleAreaMax = 0;
 	public static LatLng currentLatLng;
 	
-	public static final String MEDIATION_KEY = "b16046ed293b4d7d";
+	public static final String MEDIATION_KEY = "7a1211cf15804292";
 	
 	public static final int PAGE_ITME_NUM = 100;
 	

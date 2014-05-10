@@ -43,5 +43,29 @@ public class Datas
 		}
 
 	}
+	
+	public static class RentAreaComparator implements Comparator<RentHouse>
+	{
+
+		private int myOrder;
+
+		public RentAreaComparator(int order)
+		{
+			myOrder = order;
+		}
+
+		@Override
+		public int compare(RentHouse es1, RentHouse es2)
+		{
+			if (myOrder == 0)
+			{
+				return Double.compare(es1.rent_area, es2.rent_area);
+			} else
+			{
+				return -Double.compare(es1.rent_area, es2.rent_area);
+			}
+		}
+
+	}
 
 }

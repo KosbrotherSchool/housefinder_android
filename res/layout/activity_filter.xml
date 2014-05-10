@@ -55,40 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:text="看屋目的" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/line_gray" >
-            </LinearLayout>
-
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <RadioButton
-                    android:id="@+id/radio_buy"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="買屋" />
-
-                <RadioButton
-                    android:id="@+id/radio_sell"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="賣屋" />
-            </RadioGroup>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="預算" />
+                android:text="租金" />
 
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -107,7 +74,7 @@
                     android:id="@+id/low_house_price_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="0萬"
+                    android:hint="0元"
                     android:inputType="number" />
 
                 <TextView
@@ -125,7 +92,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="萬" />
+                    android:text="元" />
             </LinearLayout>
 
             <LinearLayout
@@ -188,7 +155,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
-                    android:text="房地型態" />
+                    android:text="出租型態" />
 
                 <ImageView
                     android:id="@+id/ground_info_image"
@@ -213,22 +180,22 @@
                 android:orientation="horizontal" >
 
                 <CheckBox
-                    android:id="@+id/ground_type_0"
+                    android:id="@+id/rent_type_0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="全選" />
 
                 <CheckBox
-                    android:id="@+id/ground_type_1"
+                    android:id="@+id/rent_type_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="房地" />
+                    android:text="整層住家" />
 
                 <CheckBox
-                    android:id="@+id/ground_type_2"
+                    android:id="@+id/rent_type_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="房地含車位" />
+                    android:text="獨立套房" />
             </LinearLayout>
 
             <LinearLayout
@@ -237,78 +204,19 @@
                 android:orientation="horizontal" >
 
                 <CheckBox
-                    android:id="@+id/ground_type_3"
+                    android:id="@+id/rent_type_3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="建物" />
+                    android:text="分租套房" />
 
                 <CheckBox
-                    android:id="@+id/ground_type_4"
+                    android:id="@+id/rent_type_4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="土地" />
+                    android:text="雅房" />
 
                 <CheckBox
-                    android:id="@+id/ground_type_5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="車位" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:gravity="center"
-                android:orientation="horizontal" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:text="建物型態" />
-
-                <ImageView
-                    android:id="@+id/build_info_image"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginLeft="5dp"
-                    android:padding="2dp"
-                    android:src="@drawable/icon_info2" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/line_gray" >
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <CheckBox
-                    android:id="@+id/building_type_0"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="全選" />
-
-                <CheckBox
-                    android:id="@+id/building_type_a"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="公寓" />
-
-                <CheckBox
-                    android:id="@+id/building_type_b"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="透天" />
-
-                <CheckBox
-                    android:id="@+id/building_type_c"
+                    android:id="@+id/rent_type_5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="店面" />
@@ -320,22 +228,28 @@
                 android:orientation="horizontal" >
 
                 <CheckBox
-                    android:id="@+id/building_type_d"
+                    android:id="@+id/rent_type_6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="商辦" />
+                    android:text="攤位" />
 
                 <CheckBox
-                    android:id="@+id/building_type_e"
+                    android:id="@+id/rent_type_7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="住宅大樓" />
+                    android:text="辦公" />
 
                 <CheckBox
-                    android:id="@+id/building_type_f"
+                    android:id="@+id/rent_type_8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="華廈" />
+                    android:text="住辦" />
+
+                <CheckBox
+                    android:id="@+id/rent_type_9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="廠房" />
             </LinearLayout>
 
             <LinearLayout
@@ -344,149 +258,23 @@
                 android:orientation="horizontal" >
 
                 <CheckBox
-                    android:id="@+id/building_type_g"
+                    android:id="@+id/rent_type_10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="套房" />
+                    android:text="車位" />
 
                 <CheckBox
-                    android:id="@+id/building_type_h"
+                    android:id="@+id/rent_type_11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="工廠" />
+                    android:text="土地" />
 
                 <CheckBox
-                    android:id="@+id/building_type_i"
+                    android:id="@+id/rent_type_12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="廠辦" />
-
-                <CheckBox
-                    android:id="@+id/building_type_j"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="農舍" />
+                    android:text="場地" />
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal" >
-
-                <CheckBox
-                    android:id="@+id/building_type_k"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="倉庫" />
-
-                <CheckBox
-                    android:id="@+id/building_type_l"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="其他" />
-            </LinearLayout>
-
-            <!--
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="屋齡" />
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@color/line_gray" >
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" >
-
-                    <EditText
-                        android:id="@+id/building_age_min"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="0年"
-                        android:inputType="number" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="-" />
-
-                    <EditText
-                        android:id="@+id/building_age_max"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Max"
-                        android:inputType="number" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="格局" />
-
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/line_gray" >
-            </LinearLayout>
-
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <RadioButton
-                    android:id="@+id/radio_one_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="1房" />
-
-                <RadioButton
-                    android:id="@+id/radio_two_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2房" />
-
-                <RadioButton
-                    android:id="@+id/radio_three_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3房" />
-
-                <RadioButton
-                    android:id="@+id/radio_four_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4房" />
-
-                <RadioButton
-                    android:id="@+id/radio_five_room"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="5房+" />
-            </RadioGroup>
-            -->
         </LinearLayout>
     </ScrollView>
 

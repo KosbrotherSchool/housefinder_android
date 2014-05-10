@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 
+import com.google.analytics.tracking.android.EasyTracker;
 import com.kosbrother.houseprice.fragment.CalculatorFragment;
 
 public class CalculatorActivity extends FragmentActivity
@@ -64,14 +65,14 @@ public class CalculatorActivity extends FragmentActivity
 	public void onStart()
 	{
 		super.onStart();
-//		EasyTracker.getInstance(this).activityStart(this); // Add this method.
+		EasyTracker.getInstance(this).activityStart(this); // Add this method.
 	}
 
 	@Override
 	public void onStop()
 	{
 		super.onStop();
-//		EasyTracker.getInstance(this).activityStop(this); // Add this method.
+		EasyTracker.getInstance(this).activityStop(this); // Add this method.
 	}
 
 }
