@@ -27,7 +27,7 @@ import com.kosbrother.houseprice.entity.Town;
 
 public class HouseApi
 {
-	final static String HOST = "http://106.186.31.71";
+	final static String HOST = "http://106.187.39.88";
 	public static final String TAG = "HOUSE_API";
 	public static final boolean DEBUG = true;
 

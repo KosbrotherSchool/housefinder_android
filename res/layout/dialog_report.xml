@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/report_dialog"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:orientation="horizontal" >
+
+        <TextView        
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="物件名稱:"
+            android:textColor="#999999"
+            android:textSize="15dp"
+            android:typeface="serif" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/house_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="問題內容:"
+            android:textColor="#999999"
+            android:textSize="15dp"
+            android:typeface="serif" >
+        </TextView>
+
+        <EditText
+            android:id="@+id/problem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="請輸入問題內容.." >
+        </EditText>
+    </LinearLayout>
+
+</LinearLayout>

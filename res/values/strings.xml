@@ -13,5 +13,7 @@
 
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
-
+	
+    <string name="respond_mail_address">kosbrotherschool@gmail.com</string>
+    
 </resources>

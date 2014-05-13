@@ -1,5 +1,6 @@
 package com.kosbrother.housefinder;
 
+import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.os.Build;
@@ -23,6 +24,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.kosbrother.housefinder.data.DatabaseHelper;
+import com.kosbrother.housefinder.tool.Report;
 import com.kosbrother.houseprice.fragment.RentDetailFragment;
 
 public class DetailActivity extends FragmentActivity
@@ -128,6 +130,11 @@ public class DetailActivity extends FragmentActivity
 		{
 		case android.R.id.home:
 			finish();
+			return true;
+		case R.id.menu_report:		
+			int currentNum = mPager.getCurrentItem();
+			String title =  Datas.mRentHouses.get(currentNum).title + "(編號:" +Integer.toString(Datas.mRentHouses.get(currentNum).rent_id) +")";
+			Report.createReportDialog(this,title,"");
 			return true;
 		case R.id.menu_up:
 			if (mPager.getCurrentItem() > 0)

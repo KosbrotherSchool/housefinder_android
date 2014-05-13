@@ -28,6 +28,7 @@ import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.kosbrother.housefinder.data.DatabaseHelper;
 import com.kosbrother.housefinder.data.OrmRentHouse;
+import com.kosbrother.housefinder.tool.Report;
 import com.kosbrother.houseprice.fragment.RentDetailFavoriteFragment;
 
 @SuppressLint("NewApi")
@@ -134,6 +135,11 @@ public class FavoriteDetailActivity extends FragmentActivity
 		{
 		case android.R.id.home:
 			finish();
+			return true;
+		case R.id.menu_report:		
+			int currentNum = mPager.getCurrentItem();
+			String title =  lists.get(currentNum).title + "(編號:" +Integer.toString(Datas.mRentHouses.get(currentNum).rent_id) +")";
+			Report.createReportDialog(this,title,"");
 			return true;
 		case R.id.menu_up:
 			if (mPager.getCurrentItem()>0)
