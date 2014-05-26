@@ -21,14 +21,14 @@ import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.kosbrother.housefinder.data.DatabaseHelper;
-import com.kosbrother.housefinder.data.OrmRentHouse;
-import com.kosbrother.houseprice.adapter.ListOrmRentHouseAdapter;
+import com.kosbrother.housefinder.data.OrmHouse;
+import com.kosbrother.houseprice.adapter.ListOrmHouseAdapter;
 
 @SuppressLint("NewApi")
 public class FavoriteActivity extends FragmentActivity
 {
 
-	private ListOrmRentHouseAdapter mAdapter;
+	private ListOrmHouseAdapter mAdapter;
 	private ListView mainListView;
 	private DatabaseHelper databaseHelper = null;
 	// private ActionBar mActionBar;
@@ -81,11 +81,11 @@ public class FavoriteActivity extends FragmentActivity
 	{
 		try
 		{
-			Dao<OrmRentHouse, Integer> rentDao = getHelper()
-					.getOrmRentHouseDao();
-			ArrayList<OrmRentHouse> lists = new ArrayList<OrmRentHouse>(
+			Dao<OrmHouse, Integer> rentDao = getHelper()
+					.getOrmHouseDao();
+			ArrayList<OrmHouse> lists = new ArrayList<OrmHouse>(
 					rentDao.queryForAll());
-			mAdapter = new ListOrmRentHouseAdapter(FavoriteActivity.this, lists);
+			mAdapter = new ListOrmHouseAdapter(FavoriteActivity.this, lists);
 			mainListView.setAdapter(mAdapter);
 
 			if (lists.size() == 0)

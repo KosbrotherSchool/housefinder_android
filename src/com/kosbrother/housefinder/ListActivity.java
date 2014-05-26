@@ -1,26 +1,30 @@
 package com.kosbrother.housefinder;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
+import android.app.ActionBar.TabListener;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.widget.DrawerLayout;
-import android.view.ActionProvider;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -38,13 +42,15 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.kosbrother.houseprice.adapter.ListRentHouseAdapter;
+import com.kosbrother.housefinder.tool.DrawerMenuItemMethoud;
+import com.kosbrother.houseprice.fragment.RentListFragment;
+import com.kosbrother.houseprice.fragment.SaleListFragment;
 
 @SuppressLint("NewApi")
-public class ListActivity extends FragmentActivity
+public class ListActivity extends FragmentActivity implements TabListener,
+		OnPageChangeListener
 {
 
-	// private ActionBarHelper mActionBar;
 	private ActionBarDrawerToggle mDrawerToggle;
 
 	private DrawerLayout mDrawerLayout;
@@ -52,17 +58,13 @@ public class ListActivity extends FragmentActivity
 	private ListView mDrawerListView;
 	private EntryAdapter mDrawerAdapter;
 
-	// private MenuItem itemSearch;
-	// private static final int ID_SEARCH = 5;
-
-	private ListRentHouseAdapter mAdapter;
-	private ListView mainListView;
-
+	// private ListRentHouseAdapter mAdapter;
+	// private ListView mainListView;
 	private int currentSortPosition;
 	private LinearLayout leftDrawer;
-	private LayoutInflater inflater;
-
 	private ActionBar mActionBar;
+	MyAdapter mAdapter;
+	ViewPager mPager;
 
 	private RelativeLayout adBannerLayout;
 	private AdView adMobAdView;
@@ -71,17 +73,34 @@ public class ListActivity extends FragmentActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.drawer_list_layout);
+		setContentView(R.layout.fragment_pager);
 		mActionBar = getActionBar();
-		mActionBar.setTitle("找屋高手: "
-				+ Integer.toString(Datas.mRentHouses.size()) + "筆");
 
-		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mActionBar.setDisplayShowTitleEnabled(false);
+		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		mActionBar.addTab(mActionBar.newTab().setText("出售")
+				.setTabListener(this));
+		mActionBar.addTab(mActionBar.newTab().setText("出租")
+				.setTabListener(this));
+		forceTabs();
+
+		mAdapter = new MyAdapter(getSupportFragmentManager());
+
+		mPager = (ViewPager) findViewById(R.id.pager);
+		mPager.setAdapter(mAdapter);
+		mPager.setOnPageChangeListener(this);
+		if (Datas.mSaleHouses.size() == 0)
+		{
+			mPager.setCurrentItem(1);
+		} else
+		{
+			mPager.setCurrentItem(0);
+		}
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 
-		// mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
 				GravityCompat.START);
 		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
@@ -109,16 +128,80 @@ public class ListActivity extends FragmentActivity
 			}
 		};
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
-
 		setDrawerLayout();
 
-		mainListView = (ListView) findViewById(R.id.list_estates);
-		mAdapter = new ListRentHouseAdapter(ListActivity.this,
-				Datas.mRentHouses);
-		mainListView.setAdapter(mAdapter);
+		// CallAds();
 
-		CallAds();
+	}
 
+	public class MyAdapter extends FragmentStatePagerAdapter
+	{
+		public MyAdapter(FragmentManager fm)
+		{
+			super(fm);
+		}
+
+		@Override
+		public int getCount()
+		{
+			return 2;
+		}
+
+		@Override
+		public Fragment getItem(int position)
+		{
+
+			Fragment mFragment = null;
+			if (position == 0)
+			{
+				mFragment = SaleListFragment.newInstance(ListActivity.this);
+			} else
+			{
+				mFragment = RentListFragment.newInstance(ListActivity.this);
+			}
+
+			return mFragment;
+		}
+
+	}
+
+	@Override
+	public void onTabReselected(Tab mTab, FragmentTransaction arg1)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onTabSelected(Tab mTab, FragmentTransaction arg1)
+	{
+		if (mPager != null)
+		{
+			mPager.setCurrentItem(mTab.getPosition());
+		}
+	}
+
+	@Override
+	public void onTabUnselected(Tab mTab, FragmentTransaction arg1)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	public void forceTabs()
+	{
+		try
+		{
+			final ActionBar actionBar = getActionBar();
+			final Method setHasEmbeddedTabsMethod = actionBar.getClass()
+					.getDeclaredMethod("setHasEmbeddedTabs", boolean.class);
+			setHasEmbeddedTabsMethod.setAccessible(true);
+			setHasEmbeddedTabsMethod.invoke(actionBar, true);
+		} catch (final Exception e)
+		{
+			// Handle issues as needed: log, warn user, fallback etc
+			// Alternatively, ignore this and default tab behaviour will apply.
+		}
 	}
 
 	private void setDrawerLayout()
@@ -212,10 +295,6 @@ public class ListActivity extends FragmentActivity
 								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						Intent it = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(it);
-						// Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
-						// ListActivity.this);
-						// Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
-						// false, ListActivity.this);
 						break;
 					case 9:
 						// about us
@@ -241,6 +320,10 @@ public class ListActivity extends FragmentActivity
 	protected void onResume()
 	{
 		super.onResume();
+		if (Datas.mRentHouses.size() == 0 && Datas.mSaleHouses.size() == 0)
+		{
+			finish();
+		}
 
 	}
 
@@ -257,7 +340,8 @@ public class ListActivity extends FragmentActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if (mDrawerToggle.onOptionsItemSelected(getMenuItem(item)))
+		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud
+				.getMenuItem(item)))
 		{
 			return true;
 		} else
@@ -316,301 +400,7 @@ public class ListActivity extends FragmentActivity
 					.sort(Datas.mRentHouses, new Datas.RentAreaComparator(1));
 			break;
 		}
-		mAdapter.notifyDataSetChanged();
-	}
-
-	private android.view.MenuItem getMenuItem(final MenuItem item)
-	{
-		return new android.view.MenuItem()
-		{
-			@Override
-			public int getItemId()
-			{
-				return item.getItemId();
-			}
-
-			public boolean isEnabled()
-			{
-				return true;
-			}
-
-			@Override
-			public boolean collapseActionView()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean expandActionView()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public ActionProvider getActionProvider()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public View getActionView()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public char getAlphabeticShortcut()
-			{
-				// TODO Auto-generated method stub
-				return 0;
-			}
-
-			@Override
-			public int getGroupId()
-			{
-				// TODO Auto-generated method stub
-				return 0;
-			}
-
-			@Override
-			public Drawable getIcon()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public Intent getIntent()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public ContextMenuInfo getMenuInfo()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public char getNumericShortcut()
-			{
-				// TODO Auto-generated method stub
-				return 0;
-			}
-
-			@Override
-			public int getOrder()
-			{
-				// TODO Auto-generated method stub
-				return 0;
-			}
-
-			@Override
-			public SubMenu getSubMenu()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public CharSequence getTitle()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public CharSequence getTitleCondensed()
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public boolean hasSubMenu()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean isActionViewExpanded()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean isCheckable()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean isChecked()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public boolean isVisible()
-			{
-				// TODO Auto-generated method stub
-				return false;
-			}
-
-			@Override
-			public android.view.MenuItem setActionProvider(
-					ActionProvider actionProvider)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setActionView(View view)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setActionView(int resId)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setAlphabeticShortcut(char alphaChar)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setCheckable(boolean checkable)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setChecked(boolean checked)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setEnabled(boolean enabled)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIcon(Drawable icon)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIcon(int iconRes)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIntent(Intent intent)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setNumericShortcut(char numericChar)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setOnActionExpandListener(
-					OnActionExpandListener listener)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setOnMenuItemClickListener(
-					OnMenuItemClickListener menuItemClickListener)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setShortcut(char numericChar,
-					char alphaChar)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public void setShowAsAction(int actionEnum)
-			{
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public android.view.MenuItem setShowAsActionFlags(int actionEnum)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitle(CharSequence title)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitle(int title)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitleCondensed(CharSequence title)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setVisible(boolean visible)
-			{
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
+		// mAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -625,7 +415,7 @@ public class ListActivity extends FragmentActivity
 	{
 		super.onStart();
 		// The rest of your onStart() code.
-		 EasyTracker.getInstance(this).activityStart(this); // Add this
+		EasyTracker.getInstance(this).activityStart(this); // Add this
 		// method.
 	}
 
@@ -634,7 +424,7 @@ public class ListActivity extends FragmentActivity
 	{
 		super.onStop();
 		// The rest of your onStop() code.
-		 EasyTracker.getInstance(this).activityStop(this); // Add this method.
+		EasyTracker.getInstance(this).activityStop(this); // Add this method.
 	}
 
 	private void CallAds()
@@ -672,6 +462,28 @@ public class ListActivity extends FragmentActivity
 
 			});
 		}
+	}
+
+	@Override
+	public void onPageScrollStateChanged(int arg0)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPageScrolled(int arg0, float arg1, int arg2)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onPageSelected(int index)
+	{
+		mPager.setCurrentItem(index);
+		mActionBar.selectTab(mActionBar.getTabAt(index));
+
 	}
 
 }

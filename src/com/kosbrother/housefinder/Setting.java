@@ -12,29 +12,43 @@ public class Setting
 	public final static String keyPurpose = "Purpose";
 	public final static String keyRentHousePriceMin = "RP_Min";
 	public final static String keyRentHousePriceMax = "RP_Max";
+	public final static String keyHousePriceMin = "HP_Min";
+	public final static String keyHousePriceMax = "HP_Max";
 	public final static String keyRentType = "RentType";
+	public final static String keySaleType = "SaleType";
 	public final static String keyBuildingType = "BuildingType";
 	public final static String keyAreaMin = "Area_Min";
 	public final static String keyAreaMax = "Area_Max";
+	public final static String keyAgeMin = "Age_Min";
+	public final static String keyAgeMax = "Age_Max";
 	public final static String keyKmDistance = "Km_Distance";
 
 	public final static String keyFirstOpenV2 = "First_OpenV2";
 	public final static String KeyCurrentDateNum = "Current_Data_Date";
 	public final static String KeyGiveStar = "Give_Star";
 	public final static String KeyPushStarDialog = "Push_Star_Dialog";
+	public final static String KeyIsShowRent = "Is_Show_Rent";
+	public final static String KeyIsShowSale = "Is_Show_Sale";
 
 	public final static String initialPurpose = "0"; // 0 for buy, 1 for sell
 	public final static String initialRentHousePriceMin = "0";
 	public final static String initialRentHousePriceMax = "0"; // 0 for max
+	public final static String initialHousePriceMin = "0";
+	public final static String initialHousePriceMax = "0";
 	public final static String initialRentType = "0";
+	public final static String initialSaleType = "0";
 	public final static String initialBuildingType = "0";
 	public final static String initialAreaMin = "0";
 	public final static String initialAreaMax = "0"; // 0 for max
+	public final static String initialAgeMin = "0";
+	public final static String initialAgeMax = "0";
 	public final static String initialKmDistance = "0.5";
 	public final static boolean initialFirstOpenV2 = true;
 	public final static int initialCurrentDate = 10212;
 	public final static boolean initialGiveStar = false;
 	public final static boolean initialPushStarDialog = true;
+	public final static boolean initialIsShowRent = true;
+	public final static boolean initialIsShowSale = true;
 
 	private static final HashMap<String, String> initMap = new HashMap<String, String>()
 	{
@@ -42,10 +56,15 @@ public class Setting
 			put(keyPurpose, initialPurpose);
 			put(keyRentHousePriceMin, initialRentHousePriceMin);
 			put(keyRentHousePriceMax, initialRentHousePriceMax);
+			put(keyHousePriceMin, initialHousePriceMin);
+			put(keyHousePriceMax, initialHousePriceMax);
 			put(keyRentType, initialRentType);
+			put(keySaleType, initialSaleType);
 			put(keyBuildingType, initialBuildingType);
 			put(keyAreaMin, initialAreaMin);
 			put(keyAreaMax, initialAreaMax);
+			put(keyAgeMin, initialAgeMin);
+			put(keyAgeMax, initialAgeMax);
 			put(keyKmDistance, initialKmDistance);
 		}
 	};
@@ -56,6 +75,8 @@ public class Setting
 			put(KeyGiveStar, initialGiveStar);
 			put(KeyPushStarDialog, initialPushStarDialog);
 			put(keyFirstOpenV2, initialFirstOpenV2);
+			put(KeyIsShowRent, initialIsShowRent);
+			put(KeyIsShowSale, initialIsShowSale);
 		}
 	};
 
@@ -93,7 +114,5 @@ public class Setting
 		sharePreference.edit().putBoolean(settingKey, settingBooleanValue)
 				.commit();
 	}
-
-
 
 }

@@ -10,10 +10,8 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,8 +19,10 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.kosbrother.houseprice.entity.County;
+import com.kosbrother.houseprice.entity.GroundType;
 import com.kosbrother.houseprice.entity.LandMark;
 import com.kosbrother.houseprice.entity.RentHouse;
+import com.kosbrother.houseprice.entity.RentType;
 import com.kosbrother.houseprice.entity.Town;
 
 public class HouseApi
@@ -39,6 +39,16 @@ public class HouseApi
 	public static ArrayList<Town> getCountyTowns(int county_id)
 	{
 		return Town.getTonwsByCounty(county_id);
+	}
+
+	public static ArrayList<RentType> getRentTypes()
+	{
+		return RentType.getRentTypes();
+	}
+
+	public static ArrayList<GroundType> getGroundType()
+	{
+		return GroundType.getGroundTypes();
 	}
 
 	public static ArrayList<RentHouse> getAroundRentsByAreas(double km_dis,
@@ -609,8 +619,8 @@ public class HouseApi
 				int type_id = 0;
 				try
 				{
-					 String type = jArray.getJSONObject(i).getString("type");
-					 type_id = LandMark.parseType(type);
+					String type = jArray.getJSONObject(i).getString("type");
+					type_id = LandMark.parseType(type);
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -647,12 +657,12 @@ public class HouseApi
 				{
 					// TODO: handle exception
 				}
-				
+
 				LandMark newLandMark = new LandMark(landMark_id, type_id,
 						title, x_lng, y_lat, dis_meter);
 				landMarks.add(newLandMark);
 			}
-			
+
 		} catch (Exception e1)
 		{
 			e1.printStackTrace();

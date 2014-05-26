@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="物件Title"
+                    android:text="搜索中..."
                     android:textSize="@dimen/detail_title_size"
                     android:textStyle="bold" />
 
@@ -65,16 +65,17 @@
                     android:orientation="horizontal" >
 
                     <ImageView
+                        android:id="@+id/detail_type_image"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:background="@drawable/marker_rent" />
+                         />
 
                     <TextView
                         android:id="@+id/detail_money_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLines="1"
-                        android:text="$20000元/月, 押金2個月" />
+                        android:text="租金, 押金" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -96,7 +97,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="型態: 公寓"
+                        android:text="型態"
                         android:textSize="@dimen/detail_text_size" />
                 </LinearLayout>
 
@@ -111,7 +112,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="3房2廳一衛"
+                        android:text="格局"
                         android:textSize="@dimen/detail_text_size" />
 
                     <TextView
@@ -119,7 +120,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="坪數: 5坪"
+                        android:text="坪數"
                         android:textSize="@dimen/detail_text_size" />
                 </LinearLayout>
 
@@ -134,7 +135,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="樓層: 4/4樓"
+                        android:text="樓層"
                         android:textSize="@dimen/detail_text_size" />
 
                     <TextView
@@ -142,7 +143,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="車位: 平面坡道"
+                        android:text="車位"
                         android:textSize="@dimen/detail_text_size" />
                 </LinearLayout>
             </LinearLayout>
@@ -176,7 +177,7 @@
                     android:id="@+id/detail_feature_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="特色內容"
+                    android:text="內容"
                     android:textSize="@dimen/detail_text_size" />
 
                 <TextView
@@ -184,7 +185,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="*最短租期: 一年\n*開伙: 不可\n*養寵物: 不可\n*身份要求: 學生,上班族\n*性別要求: 男女皆可"
+                    android:text=""
                     android:textSize="@dimen/detail_text_size" />
 
                 <TextView
@@ -192,7 +193,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="提供傢俱: 洗衣機,冰箱,電視,冷氣,熱水器,第四台"
+                    android:text=""
                     android:textSize="@dimen/detail_text_size" />
 
                 <TextView
@@ -200,7 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="提供設備: 洗衣機,冰箱,電視,冷氣,熱水器,第四台"
+                    android:text=""
                     android:textSize="@dimen/detail_text_size" />
 
                 <TextView
@@ -208,7 +209,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="生活機能: 近便利商店；傳統市場；百貨公司；學校；醫療機構；夜市"
+                    android:text=""
                     android:textSize="@dimen/detail_text_size" />
 
                 <TextView
@@ -216,7 +217,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="交通: 近竹南汽火車站公車站"
+                    android:text=""
                     android:textSize="@dimen/detail_text_size" />
             </LinearLayout>
 
@@ -393,13 +394,13 @@
                             android:id="@+id/contact_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="聯絡人: 陳先生" />
+                            android:text="聯絡人" />
 
                         <TextView
                             android:id="@+id/contact_phone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="phone: 0933456789" />
+                            android:text="phone" />
                     </LinearLayout>
 
                     <ImageButton

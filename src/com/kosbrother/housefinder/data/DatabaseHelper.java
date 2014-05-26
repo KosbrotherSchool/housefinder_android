@@ -26,10 +26,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper
 	 ************************************************/
 
 	private static final String DATABASE_NAME = "housefinder.db";
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 4;
 
-	private Dao<OrmRentHouse, Integer> RentHouseDao;
-
+	private Dao<OrmHouse, Integer> HouseDao;
+	
 	public DatabaseHelper(Context context)
 	{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION,
@@ -47,7 +47,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper
 	{
 		try
 		{
-			TableUtils.createTable(connectionSource, OrmRentHouse.class);
+			TableUtils.createTable(connectionSource, OrmHouse.class);
 		} catch (SQLException e)
 		{
 			Log.e(DatabaseHelper.class.getName(), "Unable to create datbases",
@@ -61,7 +61,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper
 	{
 		try
 		{
-			TableUtils.dropTable(connectionSource, OrmRentHouse.class, true);
+			TableUtils.dropTable(connectionSource, OrmHouse.class, true);
 			onCreate(sqliteDatabase, connectionSource);
 		} catch (SQLException e)
 		{
@@ -71,13 +71,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper
 		}
 	}
 
-	public Dao<OrmRentHouse, Integer> getOrmRentHouseDao() throws SQLException
+	public Dao<OrmHouse, Integer> getOrmHouseDao() throws SQLException
 	{
-		if (RentHouseDao == null)
+		if (HouseDao == null)
 		{
-			RentHouseDao = getDao(OrmRentHouse.class);
+			HouseDao = getDao(OrmHouse.class);
 		}
-		return RentHouseDao;
+		return HouseDao;
 	}
 
 }

@@ -2,23 +2,25 @@ package com.kosbrother.housefinder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeMap;
 
+import com.kosbrother.houseprice.entity.House;
 import com.kosbrother.houseprice.entity.RentHouse;
 
 public class Datas
 {
 
 	public static ArrayList<RentHouse> mRentHouses = new ArrayList<RentHouse>();
-	public static TreeMap<String, ArrayList<RentHouse>> mRentHouseMap;
-	public static ArrayList<String> mRentTypeArrayKey = new ArrayList<String>();
+	public static ArrayList<House> mSaleHouses = new ArrayList<House>();
+	
+//	public static TreeMap<String, ArrayList<RentHouse>> mRentHouseMap;
+//	public static ArrayList<String> mRentTypeArrayKey = new ArrayList<String>();
 
 
-	public static String getKeyByPosition(int position)
-	{
-		int num = (mRentTypeArrayKey.size() - 1) - position;
-		return mRentTypeArrayKey.get(num);
-	};
+//	public static String getKeyByPosition(int position)
+//	{
+//		int num = (mRentTypeArrayKey.size() - 1) - position;
+//		return mRentTypeArrayKey.get(num);
+//	};
 
 	public static class RentPriceComparator implements Comparator<RentHouse>
 	{

@@ -45,9 +45,10 @@
                 android:orientation="horizontal" >
 
                 <ImageView
+                    android:id="@+id/rent_type_image"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:background="@drawable/marker_rent" />
+                     />
 
                 <TextView
                     android:id="@+id/rent_list_money_text"

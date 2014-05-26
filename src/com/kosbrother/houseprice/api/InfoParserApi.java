@@ -33,25 +33,40 @@ public class InfoParserApi
 
 	public static String parseGroundType(int groundTypeId)
 	{
-		String buildType = "";
+		String groundType = "";
 		try
 		{
 			switch (groundTypeId)
 			{
 			case 1:
-				buildType = "房地";
+				groundType = "住宅";
 				break;
 			case 2:
-				buildType = "房地+車";
+				groundType = "套房";
 				break;
 			case 3:
-				buildType = "土地";
+				groundType = "店面";
 				break;
 			case 4:
-				buildType = "建物";
+				groundType = "攤位";
 				break;
 			case 5:
-				buildType = "車位";
+				groundType = "辦公";
+				break;
+			case 6:
+				groundType = "住辦";
+				break;
+			case 7:
+				groundType = "廠房";
+				break;
+			case 8:
+				groundType = "車位";
+				break;
+			case 9:
+				groundType = "土地";
+				break;
+			case 10:
+				groundType = "其他";
 				break;
 			default:
 				break;
@@ -60,7 +75,7 @@ public class InfoParserApi
 		{
 
 		}
-		return buildType;
+		return groundType;
 	}
 
 	public static String parseRoomArrangement(int rooms, int living_rooms,
@@ -180,45 +195,70 @@ public class InfoParserApi
 	public static String parsePhoneNumber(String phoneNumber)
 	{
 		String phoneString = "";
-		String word2 = phoneNumber.substring(0, 2);
-		String word3 = phoneNumber.substring(0, 3);
-		if (word2.equals("02"))
+		try
 		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("03"))
+
+			String word2 = phoneNumber.substring(0, 2);
+			String word3 = phoneNumber.substring(0, 3);
+			if (word2.equals("02"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("03"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("04"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("05"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("06"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("07"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("08"))
+			{
+				phoneString = word2 + "-" + phoneNumber.substring(2);
+			} else if (word2.equals("09"))
+			{
+				phoneString = phoneNumber.substring(0, 4) + "-"
+						+ phoneNumber.substring(4);
+			}
+
+			if (word3.equals("037"))
+			{
+				phoneString = word3 + "-" + phoneNumber.substring(3);
+			} else if (word3.equals("049"))
+			{
+				phoneString = word3 + "-" + phoneNumber.substring(3);
+			} else if (word3.equals("089"))
+			{
+				phoneString = word3 + "-" + phoneNumber.substring(3);
+			} else if (word3.equals("082"))
+			{
+				phoneString = word3 + "-" + phoneNumber.substring(3);
+			}
+		} catch (Exception e)
 		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("04"))
-		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("05"))
-		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("06"))
-		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("07"))
-		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		} else if (word2.equals("08"))
-		{
-			phoneString = word2 + "-" + phoneNumber.substring(2);
-		}else if (word2.equals("09")) {
-			phoneString =  phoneNumber.substring(0, 4) +"-"+ phoneNumber.substring(4);
-		}
-		
-		if (word3.equals("037"))
-		{
-			phoneString =  word3 +"-"+ phoneNumber.substring(3);
-		}else if (word3.equals("049")) {
-			phoneString =  word3 +"-"+ phoneNumber.substring(3);
-		}else if (word3.equals("089")) {
-			phoneString =  word3 +"-"+ phoneNumber.substring(3);
-		}else if (word3.equals("082")) {
-			phoneString =  word3 +"-"+ phoneNumber.substring(3);
+			// TODO: handle exception
 		}
 
 		return phoneString;
+	}
+
+	public static int parseTypeId(String typeString)
+	{
+		int typeId = 1;
+		if (typeString.indexOf("sale") != -1)
+		{
+			typeId = 1;
+		} else if (typeString.indexOf("rent") != -1)
+		{
+			typeId = 2;
+		}
+		return typeId;
 	}
 
 }

@@ -27,9 +27,9 @@ import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.kosbrother.housefinder.data.DatabaseHelper;
-import com.kosbrother.housefinder.data.OrmRentHouse;
-import com.kosbrother.housefinder.tool.Report;
-import com.kosbrother.houseprice.fragment.RentDetailFavoriteFragment;
+import com.kosbrother.housefinder.data.OrmHouse;
+import com.kosbrother.housefinder.tool.ProblemReport;
+import com.kosbrother.houseprice.fragment.DetailFavoriteFragment;
 
 @SuppressLint("NewApi")
 public class FavoriteDetailActivity extends FragmentActivity
@@ -38,7 +38,7 @@ public class FavoriteDetailActivity extends FragmentActivity
 	MyAdapter mAdapter;
 	ViewPager mPager;
 	private DatabaseHelper databaseHelper = null;
-	public ArrayList<OrmRentHouse> lists = null;
+	public ArrayList<OrmHouse> lists = null;
 	private ActionBar mActionBar;
 	
 	private RelativeLayout adBannerLayout;
@@ -54,8 +54,8 @@ public class FavoriteDetailActivity extends FragmentActivity
 		
 		try
 		{
-			Dao<OrmRentHouse, Integer> rentDao = getHelper().getOrmRentHouseDao();
-			lists = new ArrayList<OrmRentHouse>(rentDao.queryForAll());
+			Dao<OrmHouse, Integer> rentDao = getHelper().getOrmHouseDao();
+			lists = new ArrayList<OrmHouse>(rentDao.queryForAll());
 			NUM_ITEMS = lists.size();
 		} catch (SQLException e)
 		{
@@ -124,7 +124,7 @@ public class FavoriteDetailActivity extends FragmentActivity
 		@Override
 		public Fragment getItem(int position)
 		{
-			return RentDetailFavoriteFragment.newInstance(position, FavoriteDetailActivity.this);
+			return DetailFavoriteFragment.newInstance(position, FavoriteDetailActivity.this);
 		}
 	}
 
@@ -139,7 +139,7 @@ public class FavoriteDetailActivity extends FragmentActivity
 		case R.id.menu_report:		
 			int currentNum = mPager.getCurrentItem();
 			String title =  lists.get(currentNum).title + "(編號:" +Integer.toString(Datas.mRentHouses.get(currentNum).rent_id) +")";
-			Report.createReportDialog(this,title,"");
+			ProblemReport.createReportDialog(this,title,"");
 			return true;
 		case R.id.menu_up:
 			if (mPager.getCurrentItem()>0)

@@ -18,7 +18,6 @@
                 android:id="@+id/image_marker"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/marker_rent"
                 android:layout_marginTop="2dp"
                  />
 

@@ -1,17 +1,20 @@
 #
-# generated on 2014/04/24 04:25:56
+# generated on 2014/05/26 05:29:00
 #
 # --table-start--
-dataClass=com.kosbrother.housefinder.data.OrmRentHouse
-tableName=ormrenthouse
+dataClass=com.kosbrother.housefinder.data.OrmHouse
+tableName=ormhouse
 # --table-fields-start--
 # --field-start--
 fieldName=id
 generatedId=true
 # --field-end--
 # --field-start--
-fieldName=rent_id
-columnName=rent_id
+fieldName=house_type_id
+# --field-end--
+# --field-start--
+fieldName=house_id
+columnName=house_id
 # --field-end--
 # --field-start--
 fieldName=title
@@ -26,7 +29,7 @@ fieldName=price
 fieldName=address
 # --field-end--
 # --field-start--
-fieldName=rent_area
+fieldName=area
 # --field-end--
 # --field-start--
 fieldName=layer
@@ -48,6 +51,9 @@ fieldName=y_lat
 # --field-end--
 # --field-start--
 fieldName=rent_type_id
+# --field-end--
+# --field-start--
+fieldName=ground_type_id
 # --field-end--
 # --table-fields-end--
 # --table-end--

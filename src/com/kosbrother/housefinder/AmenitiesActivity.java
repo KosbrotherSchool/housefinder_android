@@ -42,6 +42,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kosbrother.housefinder.MainActivity.ErrorDialogFragment;
+import com.kosbrother.housefinder.tool.LocationUtils;
+import com.kosbrother.housefinder.tool.NetworkUtil;
 import com.kosbrother.houseprice.api.HouseApi;
 import com.kosbrother.houseprice.api.InfoParserApi;
 import com.kosbrother.houseprice.entity.LandMark;

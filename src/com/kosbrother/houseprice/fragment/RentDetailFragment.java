@@ -29,10 +29,11 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.kosbrother.housefinder.AmenitiesActivity;
+import com.kosbrother.housefinder.AppConstants;
 import com.kosbrother.housefinder.Datas;
 import com.kosbrother.housefinder.DetailActivity;
 import com.kosbrother.housefinder.R;
-import com.kosbrother.housefinder.data.OrmRentHouse;
+import com.kosbrother.housefinder.data.OrmHouse;
 import com.kosbrother.houseprice.api.HouseApi;
 import com.kosbrother.houseprice.api.InfoParserApi;
 import com.kosbrother.houseprice.entity.RentHouse;
@@ -85,7 +86,8 @@ public class RentDetailFragment extends Fragment
 	private ImageView mapImageView;
 	private ViewPager imageViewPager;
 	private CirclePageIndicator mIndicator;
-
+	
+	private ImageView typeImageView;
 	private TextView titleTextView;
 	private TextView addressTextView;
 	private TextView moneyTextView;
@@ -136,13 +138,16 @@ public class RentDetailFragment extends Fragment
 		// mIndicator.setBackgroundColor(0xFFCCCCCC);
 		mIndicator.setRadius(4 * density);
 		mIndicator.setPageColor(getActivity().getResources().getColor(
-				R.color.gray_2));
+				R.color.circle_gray));
 		mIndicator.setFillColor(getActivity().getResources().getColor(
 				R.color.light_black));
 		mIndicator.setStrokeColor(getActivity().getResources().getColor(
 				R.color.white));
 		mIndicator.setStrokeWidth(1 * density);
-
+		
+		typeImageView = (ImageView) v.findViewById(R.id.detail_type_image);
+		typeImageView.setImageResource(R.drawable.marker_rent);
+		
 		titleTextView = (TextView) v.findViewById(R.id.detail_text_title);
 		addressTextView = (TextView) v.findViewById(R.id.detail_text_address);
 		moneyTextView = (TextView) v.findViewById(R.id.detail_money_text);
@@ -394,7 +399,8 @@ public class RentDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					Intent intent = new Intent(getActivity(), AmenitiesActivity.class);
+					Intent intent = new Intent(getActivity(),
+							AmenitiesActivity.class);
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theRentHouse.x_long);
 					bundle.putDouble("house_y", theRentHouse.y_lat);
@@ -438,19 +444,36 @@ public class RentDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					if (theRentHouse.phone_number != null  && !theRentHouse.phone_number.equals("") && !theRentHouse.phone_number.equals("null"))
-					{	
-						EasyTracker easyTracker = EasyTracker
-								.getInstance(getActivity());
-						easyTracker.send(MapBuilder.createEvent("Button",
-								"button_press", "call_button", null).build());
-						Intent intent = new Intent(Intent.ACTION_CALL, Uri
-								.parse("tel:" + theRentHouse.phone_number));
-						startActivity(intent);
-					}else {
-						Toast.makeText(getActivity(), "無電話", Toast.LENGTH_SHORT).show();
+
+					if (AppConstants.isTablet(getActivity()))
+					{
+						Toast.makeText(getActivity(), "此裝置無電話",
+								Toast.LENGTH_SHORT).show();
+					} else
+					{
+
+						if (theRentHouse.phone_number != null
+								&& !theRentHouse.phone_number.equals("")
+								&& !theRentHouse.phone_number.equals("null"))
+						{
+							EasyTracker easyTracker = EasyTracker
+									.getInstance(getActivity());
+							easyTracker.send(MapBuilder.createEvent("Button",
+									"button_press", "call_button", null)
+									.build());
+							// Intent intent = new Intent(Intent.ACTION_CALL,
+							// Uri
+							// .parse("tel:" + theRentHouse.phone_number));
+							Intent intent = new Intent(Intent.ACTION_DIAL, Uri
+									.parse("tel:" + theRentHouse.phone_number));
+							intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+							startActivity(intent);
+						} else
+						{
+							Toast.makeText(getActivity(), "無電話",
+									Toast.LENGTH_SHORT).show();
+						}
 					}
-					
 				}
 			});
 
@@ -460,20 +483,21 @@ public class RentDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-//					double latitude = theRentHouse.y_lat;
-//					double longitude = theRentHouse.x_long;
-//					String label = theRentHouse.title;
-//					String uriBegin = "geo:" + latitude + "," + longitude;
-//					String query = latitude + "," + longitude + "(" + label
-//							+ ")";
-//					String encodedQuery = Uri.encode(query);
-//					String uriString = uriBegin + "?q=" + encodedQuery
-//							+ "&z=16";
-//					Uri uri = Uri.parse(uriString);
-//					Intent intent = new Intent(
-//							android.content.Intent.ACTION_VIEW, uri);
-//					startActivity(intent);
-					Intent intent = new Intent(getActivity(), AmenitiesActivity.class);
+					// double latitude = theRentHouse.y_lat;
+					// double longitude = theRentHouse.x_long;
+					// String label = theRentHouse.title;
+					// String uriBegin = "geo:" + latitude + "," + longitude;
+					// String query = latitude + "," + longitude + "(" + label
+					// + ")";
+					// String encodedQuery = Uri.encode(query);
+					// String uriString = uriBegin + "?q=" + encodedQuery
+					// + "&z=16";
+					// Uri uri = Uri.parse(uriString);
+					// Intent intent = new Intent(
+					// android.content.Intent.ACTION_VIEW, uri);
+					// startActivity(intent);
+					Intent intent = new Intent(getActivity(),
+							AmenitiesActivity.class);
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theRentHouse.x_long);
 					bundle.putDouble("house_y", theRentHouse.y_lat);
@@ -481,7 +505,7 @@ public class RentDetailFragment extends Fragment
 					bundle.putInt("price", theRentHouse.price);
 					intent.putExtras(bundle);
 					startActivity(intent);
-					
+
 				}
 			});
 
@@ -504,19 +528,19 @@ public class RentDetailFragment extends Fragment
 
 					try
 					{
-						Dao<OrmRentHouse, Integer> rentHouseDao = mActivity
-								.getHelper().getOrmRentHouseDao();
+						Dao<OrmHouse, Integer> rentHouseDao = mActivity
+								.getHelper().getOrmHouseDao();
 
 						if (!getIsAddFavorite(theRentHouse.rent_id))
 						{
 
-							OrmRentHouse newRentHouse = new OrmRentHouse();
-							newRentHouse.rent_id = theRentHouse.rent_id;
+							OrmHouse newRentHouse = new OrmHouse();
+							newRentHouse.house_id = theRentHouse.rent_id;
 							newRentHouse.title = theRentHouse.title;
 							newRentHouse.promote_pic = theRentHouse.promote_pic;
 							newRentHouse.price = theRentHouse.price;
 							newRentHouse.address = theRentHouse.address;
-							newRentHouse.rent_area = theRentHouse.rent_area;
+							newRentHouse.area = theRentHouse.rent_area;
 							newRentHouse.layer = theRentHouse.layer;
 							newRentHouse.total_layer = theRentHouse.total_layer;
 							newRentHouse.rooms = theRentHouse.rooms;
@@ -524,6 +548,7 @@ public class RentDetailFragment extends Fragment
 							newRentHouse.x_long = theRentHouse.x_long;
 							newRentHouse.y_lat = theRentHouse.y_lat;
 							newRentHouse.rent_type_id = theRentHouse.rent_type_id;
+							newRentHouse.house_type_id = AppConstants.TYPE_ID_RENT;
 							rentHouseDao.create(newRentHouse);
 							Toast.makeText(getActivity(), "已加入最愛!",
 									Toast.LENGTH_SHORT).show();
@@ -533,10 +558,10 @@ public class RentDetailFragment extends Fragment
 						} else
 						{
 
-							DeleteBuilder<OrmRentHouse, Integer> deleteBuilder = rentHouseDao
+							DeleteBuilder<OrmHouse, Integer> deleteBuilder = rentHouseDao
 									.deleteBuilder();
 							deleteBuilder.where().eq(
-									OrmRentHouse.Column_Rent_ID_NAME,
+									OrmHouse.Column_House_ID_NAME,
 									theRentHouse.rent_id);
 							deleteBuilder.delete();
 							Toast.makeText(mActivity, "從我的最愛移除!",
@@ -562,12 +587,12 @@ public class RentDetailFragment extends Fragment
 		Boolean isBoolean = false;
 		try
 		{
-			Dao<OrmRentHouse, Integer> rentHouseDao = mActivity.getHelper()
-					.getOrmRentHouseDao();
-			QueryBuilder<OrmRentHouse, Integer> queryBuilder = rentHouseDao
+			Dao<OrmHouse, Integer> rentHouseDao = mActivity.getHelper()
+					.getOrmHouseDao();
+			QueryBuilder<OrmHouse, Integer> queryBuilder = rentHouseDao
 					.queryBuilder();
-			queryBuilder.where().eq(OrmRentHouse.Column_Rent_ID_NAME, rent_id);
-			List<OrmRentHouse> list = queryBuilder.query();
+			queryBuilder.where().eq(OrmHouse.Column_House_ID_NAME, rent_id);
+			List<OrmHouse> list = queryBuilder.query();
 			if (list.size() > 0)
 			{
 				isBoolean = true;

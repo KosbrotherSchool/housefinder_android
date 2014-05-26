@@ -1,6 +1,5 @@
 package com.kosbrother.housefinder;
 
-import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.os.Build;
@@ -24,8 +23,10 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.kosbrother.housefinder.data.DatabaseHelper;
-import com.kosbrother.housefinder.tool.Report;
+import com.kosbrother.housefinder.tool.ProblemReport;
+import com.kosbrother.houseprice.api.InfoParserApi;
 import com.kosbrother.houseprice.fragment.RentDetailFragment;
+import com.kosbrother.houseprice.fragment.SaleDetailFragment;
 
 public class DetailActivity extends FragmentActivity
 {
@@ -34,9 +35,10 @@ public class DetailActivity extends FragmentActivity
 	ViewPager mPager;
 	private ActionBar mActionBar;
 	private DatabaseHelper databaseHelper = null;
-	
+
 	private RelativeLayout adBannerLayout;
 	private AdView adMobAdView;
+	private int typeId;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -45,10 +47,32 @@ public class DetailActivity extends FragmentActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.non_scrollable_fragment_pager);
 		Bundle bundle = getIntent().getExtras();
-		int position = bundle.getInt("ItemPosition");
 
-		NUM_ITEMS = Datas.mRentHouses.size();
+		String paramsString = bundle.getString("type_num");
+		String positionString = paramsString.substring(paramsString
+				.indexOf("_") + 1);
+		int position = Integer.valueOf(positionString);
+		String type = paramsString.substring(0, paramsString.indexOf("_"));
+		typeId = InfoParserApi.parseTypeId(type);
 
+		// int position = bundle.getInt("ItemPosition");
+
+		if (typeId == 1)
+		{
+			NUM_ITEMS = Datas.mSaleHouses.size();
+		} else if (typeId == 2)
+		{
+			NUM_ITEMS = Datas.mRentHouses.size();
+		}
+
+		setPagers(position);
+
+		CallAds();
+	}
+
+	private void setPagers(int position)
+	{
+		// TODO Auto-generated method stub
 		mAdapter = new MyAdapter(getSupportFragmentManager());
 
 		mPager = (ViewPager) findViewById(R.id.pager);
@@ -94,10 +118,8 @@ public class DetailActivity extends FragmentActivity
 				// TODO Auto-generated method stub
 
 			}
-			
-		});
 
-		CallAds();
+		});
 	}
 
 	public class MyAdapter extends FragmentStatePagerAdapter
@@ -116,12 +138,21 @@ public class DetailActivity extends FragmentActivity
 		@Override
 		public Fragment getItem(int position)
 		{
-			return RentDetailFragment.newInstance(position,
-					DetailActivity.this);
-		}
-		
-	}
+			Fragment mFragment = null;
 
+			if (typeId == 1)
+			{
+				mFragment = SaleDetailFragment.newInstance(position,
+						DetailActivity.this);
+			} else if (typeId == 2)
+			{
+				mFragment = RentDetailFragment.newInstance(position,
+						DetailActivity.this);
+			}
+
+			return mFragment;
+		}
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -131,10 +162,14 @@ public class DetailActivity extends FragmentActivity
 		case android.R.id.home:
 			finish();
 			return true;
-		case R.id.menu_report:		
+		case R.id.menu_report:
 			int currentNum = mPager.getCurrentItem();
-			String title =  Datas.mRentHouses.get(currentNum).title + "(編號:" +Integer.toString(Datas.mRentHouses.get(currentNum).rent_id) +")";
-			Report.createReportDialog(this,title,"");
+			String title = Datas.mRentHouses.get(currentNum).title
+					+ "(編號:"
+					+ Integer
+							.toString(Datas.mRentHouses.get(currentNum).rent_id)
+					+ ")";
+			ProblemReport.createReportDialog(this, title, "");
 			return true;
 		case R.id.menu_up:
 			if (mPager.getCurrentItem() > 0)
@@ -169,7 +204,7 @@ public class DetailActivity extends FragmentActivity
 
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	@Override
 	protected void onDestroy()
 	{
@@ -193,11 +228,12 @@ public class DetailActivity extends FragmentActivity
 	{
 		if (databaseHelper == null)
 		{
-			databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+			databaseHelper = OpenHelperManager.getHelper(this,
+					DatabaseHelper.class);
 		}
 		return databaseHelper;
 	}
-	
+
 	private void CallAds()
 	{
 		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
@@ -234,13 +270,13 @@ public class DetailActivity extends FragmentActivity
 			});
 		}
 	}
-	
+
 	@Override
 	public void onStart()
 	{
 		super.onStart();
 		// The rest of your onStart() code.
-		 EasyTracker.getInstance(this).activityStart(this); // Add this
+		EasyTracker.getInstance(this).activityStart(this); // Add this
 		// method.
 	}
 
@@ -249,7 +285,19 @@ public class DetailActivity extends FragmentActivity
 	{
 		super.onStop();
 		// The rest of your onStop() code.
-		 EasyTracker.getInstance(this).activityStop(this); // Add this method.
+		EasyTracker.getInstance(this).activityStop(this); // Add this method.
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		if ((typeId == 2 && Datas.mRentHouses.size() == 0)
+				|| (typeId == 1 && Datas.mSaleHouses.size() == 0))
+		{
+			finish();
+		}
+
 	}
 
 }

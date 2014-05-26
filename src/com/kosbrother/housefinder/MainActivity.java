@@ -2,7 +2,6 @@ package com.kosbrother.housefinder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -12,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -28,13 +26,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -72,9 +67,14 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.kosbrother.housefinder.tool.DrawerMenuItemMethoud;
+import com.kosbrother.housefinder.tool.LocationUtils;
+import com.kosbrother.housefinder.tool.NetworkUtil;
 import com.kosbrother.houseprice.api.HouseApi;
+import com.kosbrother.houseprice.api.HouseApi2;
 import com.kosbrother.houseprice.api.InfoParserApi;
 import com.kosbrother.houseprice.entity.County;
+import com.kosbrother.houseprice.entity.House;
 import com.kosbrother.houseprice.entity.RentHouse;
 import com.kosbrother.houseprice.entity.Town;
 import com.kosbrother.houseprice.fragment.TransparentSupportMapFragment;
@@ -93,46 +93,43 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public static boolean isBackFromFilter = false;
 	public static boolean isBackFromListFilterButton = false;
 	public static boolean isBackFromListGetLocationButton = false;
-
-	private MarkerOptions loacationMarker;
-
-	private float mapSize;
-
-	private MenuItem itemSearch;
 	private static final int ID_SEARCH = 5;
+	private float mapSize;
+	private int currentMapTypePosition = 0;
+	private int currentPosition = 0;
+	private int infoType; // 1 for sale, 2 for rent
+
+	private LayoutInflater inflater;
+	private ImageLoader imageLoader;
+	private LinearLayout leftDrawer;
+	private LinearLayout mainRentLayout;
+	private LinearLayout linearInfoContent;
+	private LinearLayout linearInfoSwitch;
+	private LinearLayout locationsButtonLayout;
+	private LinearLayout linearFilter;
+	private LinearLayout linearProgressLayout;
+	private ImageButton infoBackButton;
+	private ImageButton infoForwardbButton;
+	private ImageButton btnFocusButton;
+	private ImageButton btnLayerButton;
+	private TextView infoNumsTextView;
+	private TextView titleRentTextView;
+	private TextView titleSaleTextView;
+	private ImageView titleRentImageView;
+	private ImageView titleSaleImageView;
 
 	private ActionBarDrawerToggle mDrawerToggle;
 	private DrawerLayout mDrawerLayout;
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ListView mDrawerListView;
 	private EntryAdapter mDrawerAdapter;
-	private LinearLayout leftDrawer;
+	private MenuItem itemSearch;
 
-	private boolean isRentHouseTaskRunning;
-	private ArrayList<MarkerOptions> mMarkers = new ArrayList<MarkerOptions>();
-	private LayoutInflater inflater;
-
-	private TextView titleRentTextView;
-	private LinearLayout linearProgressLayout;
-	// private LinearLayout linearTitlecontentLayout;
-
-	private LinearLayout locationsButtonLayout;
-	private LinearLayout linearFilter;
-
-	private ImageButton btnFocusButton;
-	private ImageButton btnLayerButton;
-	private int currentMapTypePosition = 0;
-
-	private LinearLayout mainRentLayout;
-	private ImageLoader imageLoader;
 	private ArrayList<RentHouse> aroundRentHouses = new ArrayList<RentHouse>();
+	private ArrayList<House> aroundSaleHouses = new ArrayList<House>();
 	private ArrayList<MarkerOptions> aroudMarkers = new ArrayList<MarkerOptions>();
-	private LinearLayout linearInfoSwitch;
-	private ImageButton infoBackButton;
-	private ImageButton infoForwardbButton;
-	private TextView infoNumsTextView;
-	private int currentPosition = 0;
-	private LinearLayout linearInfoContent;
+	private ArrayList<MarkerOptions> mMarkers = new ArrayList<MarkerOptions>();
+	private MarkerOptions loacationMarker;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -165,6 +162,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 		titleRentTextView = (TextView) findViewById(R.id.title_rent_text);
+		titleSaleTextView = (TextView) findViewById(R.id.title_sale_text);
 		linearProgressLayout = (LinearLayout) findViewById(R.id.linear_title_progress);
 		locationsButtonLayout = (LinearLayout) findViewById(R.id.linear_location_button);
 		linearFilter = (LinearLayout) findViewById(R.id.linear_filter);
@@ -174,6 +172,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		infoForwardbButton = (ImageButton) findViewById(R.id.button_info_forward);
 		infoNumsTextView = (TextView) findViewById(R.id.text_info_nums);
 		linearInfoContent = (LinearLayout) findViewById(R.id.linear_info_contact);
+		titleRentImageView = (ImageView) findViewById(R.id.title_image_rent);
+		titleSaleImageView = (ImageView) findViewById(R.id.title_image_sale);
 
 		imageLoader = new ImageLoader(this, 100);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
@@ -363,7 +363,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				easyTracker.send(MapBuilder.createEvent("Button",
 						"button_press", "filter_button", null).build());
 				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, FilterActivity.class);
+				intent.setClass(MainActivity.this, FilterNewActivity.class);
 				startActivity(intent);
 			}
 		});
@@ -374,14 +374,24 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			@Override
 			public void onClick(View v)
 			{
+
+				int aroundSize = 0;
+				if (infoType == 1)
+				{
+					aroundSize = aroundSaleHouses.size();
+				} else if (infoType == 2)
+				{
+					aroundSize = aroundRentHouses.size();
+				}
+
 				if (currentPosition != 0)
 				{
 					currentPosition = currentPosition - 1;
-					setInfoWindow(currentPosition, aroundRentHouses.size());
+					setInfoWindow(currentPosition, infoType);
 				} else
 				{
-					currentPosition = aroundRentHouses.size() - 1;
-					setInfoWindow(currentPosition, aroundRentHouses.size());
+					currentPosition = aroundSize - 1;
+					setInfoWindow(currentPosition, infoType);
 				}
 
 			}
@@ -394,14 +404,23 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			@Override
 			public void onClick(View v)
 			{
-				if (currentPosition != aroundRentHouses.size() - 1)
+				int aroundSize = 0;
+				if (infoType == 1)
+				{
+					aroundSize = aroundSaleHouses.size();
+				} else if (infoType == 2)
+				{
+					aroundSize = aroundRentHouses.size();
+				}
+
+				if (currentPosition != aroundSize - 1)
 				{
 					currentPosition = currentPosition + 1;
-					setInfoWindow(currentPosition, aroundRentHouses.size());
+					setInfoWindow(currentPosition, infoType);
 				} else
 				{
 					currentPosition = 0;
-					setInfoWindow(currentPosition, aroundRentHouses.size());
+					setInfoWindow(currentPosition, infoType);
 				}
 
 			}
@@ -413,82 +432,179 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			@Override
 			public void onClick(View v)
 			{
-				int position = Integer.valueOf(aroudMarkers
-						.get(currentPosition).getTitle());
 
-				Intent intent = new Intent(MainActivity.this,
-						DetailActivity.class);
-				Bundle bundle = new Bundle();
-				bundle.putInt("ItemPosition", position);
-				intent.putExtras(bundle);
-				startActivity(intent);
+				if (aroudMarkers.get(currentPosition) == null
+						|| aroudMarkers.get(currentPosition).getTitle() == null)
+				{
+					Toast.makeText(MainActivity.this, "marker null",
+							Toast.LENGTH_SHORT).show();
+				} else
+				{
+
+					try
+					{
+
+						String paramsString = aroudMarkers
+								.get(currentPosition).getTitle();
+//						String positionString = paramsString
+//								.substring(paramsString.indexOf("_") + 1);
+//						int position = Integer.valueOf(positionString);
+//						String type = paramsString.substring(0,
+//								paramsString.indexOf("_"));
+						
+						Intent intent = new Intent(MainActivity.this,
+								DetailActivity.class);
+						Bundle bundle = new Bundle();
+						bundle.putString("type_num", paramsString);
+						intent.putExtras(bundle);
+						startActivity(intent);
+						
+					} catch (Exception e)
+					{
+
+					}
+
+				}
+
+//				int position = Integer.valueOf(aroudMarkers
+//						.get(currentPosition).getTitle());
+//
+//				Intent intent = new Intent(MainActivity.this,
+//						DetailActivity.class);
+//				Bundle bundle = new Bundle();
+//				bundle.putInt("ItemPosition", position);
+//				intent.putExtras(bundle);
+//				startActivity(intent);
 			}
 		});
 
 	}
 
-	private void setInfoWindow(int currentPosition, int total_size)
+	private void setInfoWindow(int currentPosition, int info_type)
 	{
-
-		infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
-				+ Integer.toString(total_size));
-
 		TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
 		TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
 		TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
-
 		TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
-
 		ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
+		ImageView typeImageView = (ImageView) findViewById(R.id.info_type_image);
 
-		imageLoader.DisplayImage(
-				aroundRentHouses.get(currentPosition).promote_pic, imageView);
-
-		textAddress.setText(aroundRentHouses.get(currentPosition).address);
-		textTitle.setText(aroundRentHouses.get(currentPosition).title);
-
-		String moneyString = "<font size=\"3\" color=\"red\">"
-				+ Integer.toString(aroundRentHouses.get(currentPosition).price)
-				+ "元/月"
-				+ "</font>"
-				+ ",&nbsp;"
-				+ "<font size=\"3\" color=\"black\">"
-				+ InfoParserApi.parseRentArea(aroundRentHouses
-						.get(currentPosition).rent_area) + "坪" + "</font>";
-		textMoney.setText(Html.fromHtml(moneyString));
-
-		String typeString = "<font size=\"3\" color=\"black\">"
-				+ InfoParserApi.parseRentType(aroundRentHouses
-						.get(currentPosition).rent_type_id);
-
-		if (InfoParserApi.parseRoomArrangement(
-				aroundRentHouses.get(currentPosition).rooms, 0,
-				aroundRentHouses.get(currentPosition).rest_rooms, 0) != "")
+		if (info_type == 1)
 		{
-			typeString = typeString
-					+ ",&nbsp;"
-					+ InfoParserApi
-							.parseRoomArrangement(
-									aroundRentHouses.get(currentPosition).rooms,
-									0,
-									aroundRentHouses.get(currentPosition).rest_rooms,
-									0);
-		}
+			infoNumsTextView.setText(Integer.toString(currentPosition + 1)
+					+ " / " + Integer.toString(aroundSaleHouses.size()));
 
-		if (InfoParserApi.parseLayers(
-				aroundRentHouses.get(currentPosition).layer,
-				aroundRentHouses.get(currentPosition).total_layer) != "")
+			imageLoader.DisplayImage(
+					Datas.mSaleHouses.get(currentPosition).promote_pic,
+					imageView);
+			typeImageView.setImageResource(R.drawable.marker_sale);
+
+			textAddress.setText(aroundSaleHouses.get(currentPosition).address);
+			textTitle.setText(aroundSaleHouses.get(currentPosition).title);
+
+			String moneyString = "<font size=\"3\" color=\"red\">"
+					+ Integer
+							.toString(aroundSaleHouses.get(currentPosition).price)
+					+ "萬"
+					+ "</font>"
+					+ ",&nbsp;"
+					+ "<font size=\"3\" color=\"black\">"
+					+ InfoParserApi.parseRentArea(aroundSaleHouses
+							.get(currentPosition).total_area) + "坪" + "</font>";
+			textMoney.setText(Html.fromHtml(moneyString));
+
+			String typeString = "<font size=\"3\" color=\"black\">"
+					+ InfoParserApi.parseGroundType(aroundSaleHouses
+							.get(currentPosition).ground_type_id);
+
+			if (InfoParserApi.parseRoomArrangement(
+					aroundSaleHouses.get(currentPosition).rooms, 0,
+					aroundSaleHouses.get(currentPosition).rest_rooms, 0) != "")
+			{
+				typeString = typeString
+						+ ",&nbsp;"
+						+ InfoParserApi
+								.parseRoomArrangement(
+										aroundSaleHouses.get(currentPosition).rooms,
+										0,
+										aroundSaleHouses.get(currentPosition).rest_rooms,
+										0);
+			}
+
+			if (InfoParserApi.parseLayers(
+					aroundSaleHouses.get(currentPosition).layer,
+					aroundSaleHouses.get(currentPosition).total_layer) != "")
+			{
+				typeString = typeString
+						+ ",&nbsp;"
+						+ InfoParserApi
+								.parseLayers(
+										aroundSaleHouses.get(currentPosition).layer,
+										aroundSaleHouses.get(currentPosition).total_layer);
+			}
+
+			typeString = typeString + "</font>";
+
+			textRentType.setText(Html.fromHtml(typeString));
+
+		} else if (info_type == 2)
 		{
-			typeString = typeString
+			infoNumsTextView.setText(Integer.toString(currentPosition + 1)
+					+ " / " + Integer.toString(aroundRentHouses.size()));
+
+			imageLoader.DisplayImage(
+					aroundRentHouses.get(currentPosition).promote_pic,
+					imageView);
+			typeImageView.setImageResource(R.drawable.marker_rent);
+
+			textAddress.setText(aroundRentHouses.get(currentPosition).address);
+			textTitle.setText(aroundRentHouses.get(currentPosition).title);
+
+			String moneyString = "<font size=\"3\" color=\"red\">"
+					+ Integer
+							.toString(aroundRentHouses.get(currentPosition).price)
+					+ "元/月"
+					+ "</font>"
 					+ ",&nbsp;"
-					+ InfoParserApi.parseLayers(
-							aroundRentHouses.get(currentPosition).layer,
-							aroundRentHouses.get(currentPosition).total_layer);
+					+ "<font size=\"3\" color=\"black\">"
+					+ InfoParserApi.parseRentArea(aroundRentHouses
+							.get(currentPosition).rent_area) + "坪" + "</font>";
+			textMoney.setText(Html.fromHtml(moneyString));
+
+			String typeString = "<font size=\"3\" color=\"black\">"
+					+ InfoParserApi.parseRentType(aroundRentHouses
+							.get(currentPosition).rent_type_id);
+
+			if (InfoParserApi.parseRoomArrangement(
+					aroundRentHouses.get(currentPosition).rooms, 0,
+					aroundRentHouses.get(currentPosition).rest_rooms, 0) != "")
+			{
+				typeString = typeString
+						+ ",&nbsp;"
+						+ InfoParserApi
+								.parseRoomArrangement(
+										aroundRentHouses.get(currentPosition).rooms,
+										0,
+										aroundRentHouses.get(currentPosition).rest_rooms,
+										0);
+			}
+
+			if (InfoParserApi.parseLayers(
+					aroundRentHouses.get(currentPosition).layer,
+					aroundRentHouses.get(currentPosition).total_layer) != "")
+			{
+				typeString = typeString
+						+ ",&nbsp;"
+						+ InfoParserApi
+								.parseLayers(
+										aroundRentHouses.get(currentPosition).layer,
+										aroundRentHouses.get(currentPosition).total_layer);
+			}
+
+			typeString = typeString + "</font>";
+
+			textRentType.setText(Html.fromHtml(typeString));
 		}
-
-		typeString = typeString + "</font>";
-
-		textRentType.setText(Html.fromHtml(typeString));
 	}
 
 	@Override
@@ -691,7 +807,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		if (isBackFromListFilterButton)
 		{
 			Intent intent = new Intent();
-			intent.setClass(MainActivity.this, FilterActivity.class);
+			intent.setClass(MainActivity.this, FilterNewActivity.class);
 			startActivity(intent);
 			isBackFromListFilterButton = false;
 		} else
@@ -701,6 +817,17 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				mLocationClient.connect();
 			}
 		}
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		if (Datas.mRentHouses.size() == 0 && Datas.mSaleHouses.size() == 0)
+		{
+			isReSearch = true;
+		}
+
 	}
 
 	@Override
@@ -815,84 +942,201 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 								Toast.LENGTH_SHORT).show();
 						return true;
 					}
-
-					int position = Integer.valueOf(marker.getTitle());
-
-					mainRentLayout.setVisibility(View.VISIBLE);
-
-					TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
-					TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
-					TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
-
-					TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
-
-					ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
-
-					imageLoader.DisplayImage(
-							Datas.mRentHouses.get(position).promote_pic,
-							imageView);
-
-					textAddress.setText(Datas.mRentHouses.get(position).address);
-					textTitle.setText(Datas.mRentHouses.get(position).title);
-
-					String moneyString = "<font size=\"3\" color=\"red\">"
-							+ Integer.toString(Datas.mRentHouses.get(position).price)
-							+ "元/月"
-							+ "</font>"
-							+ ",&nbsp;"
-							+ "<font size=\"3\" color=\"black\">"
-							+ InfoParserApi.parseRentArea(Datas.mRentHouses
-									.get(position).rent_area) + "坪" + "</font>";
-					textMoney.setText(Html.fromHtml(moneyString));
-
-					String typeString = "<font size=\"3\" color=\"black\">"
-							+ InfoParserApi.parseRentType(Datas.mRentHouses
-									.get(position).rent_type_id);
-
-					if (InfoParserApi.parseRoomArrangement(
-							Datas.mRentHouses.get(position).rooms, 0,
-							Datas.mRentHouses.get(position).rest_rooms, 0) != "")
+					try
 					{
-						typeString = typeString
-								+ ",&nbsp;"
-								+ InfoParserApi.parseRoomArrangement(
-										Datas.mRentHouses.get(position).rooms,
-										0,
-										Datas.mRentHouses.get(position).rest_rooms,
-										0);
-					}
 
-					if (InfoParserApi.parseLayers(
-							Datas.mRentHouses.get(position).layer,
-							Datas.mRentHouses.get(position).total_layer) != "")
+						String paramsString = marker.getTitle();
+						String positionString = paramsString
+								.substring(paramsString.indexOf("_") + 1);
+						int position = Integer.valueOf(positionString);
+						String type = paramsString.substring(0,
+								paramsString.indexOf("_"));
+
+						mainRentLayout.setVisibility(View.VISIBLE);
+						TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
+						TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
+						TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
+						TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
+						ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
+						ImageView typeImageView = (ImageView) findViewById(R.id.info_type_image);
+
+						if (type.equals("rent"))
+						{
+							infoType = 2;
+							imageLoader.DisplayImage(
+									Datas.mRentHouses.get(position).promote_pic,
+									imageView);
+							typeImageView
+									.setImageResource(R.drawable.marker_rent);
+
+							textAddress.setText(Datas.mRentHouses.get(position).address);
+							textTitle.setText(Datas.mRentHouses.get(position).title);
+
+							String moneyString = "<font size=\"3\" color=\"red\">"
+									+ Integer.toString(Datas.mRentHouses
+											.get(position).price)
+									+ "元/月"
+									+ "</font>"
+									+ ",&nbsp;"
+									+ "<font size=\"3\" color=\"black\">"
+									+ InfoParserApi
+											.parseRentArea(Datas.mRentHouses
+													.get(position).rent_area)
+									+ "坪" + "</font>";
+							textMoney.setText(Html.fromHtml(moneyString));
+
+							String typeString = "<font size=\"3\" color=\"black\">"
+									+ InfoParserApi.parseRentType(Datas.mRentHouses
+											.get(position).rent_type_id);
+
+							if (InfoParserApi.parseRoomArrangement(
+									Datas.mRentHouses.get(position).rooms, 0,
+									Datas.mRentHouses.get(position).rest_rooms,
+									0) != "")
+							{
+								typeString = typeString
+										+ ",&nbsp;"
+										+ InfoParserApi.parseRoomArrangement(
+												Datas.mRentHouses.get(position).rooms,
+												0,
+												Datas.mRentHouses.get(position).rest_rooms,
+												0);
+							}
+
+							if (InfoParserApi.parseLayers(
+									Datas.mRentHouses.get(position).layer,
+									Datas.mRentHouses.get(position).total_layer) != "")
+							{
+								typeString = typeString
+										+ ",&nbsp;"
+										+ InfoParserApi.parseLayers(
+												Datas.mRentHouses.get(position).layer,
+												Datas.mRentHouses.get(position).total_layer);
+							}
+
+							typeString = typeString + "</font>";
+
+							textRentType.setText(Html.fromHtml(typeString));
+
+							setAroundRentHouses(position);
+
+							if (aroundRentHouses.size() > 1)
+							{
+								linearInfoSwitch.setVisibility(View.VISIBLE);
+							} else
+							{
+								linearInfoSwitch.setVisibility(View.GONE);
+							}
+						} else if (type.equals("sale"))
+						{
+							infoType = 1;
+							imageLoader.DisplayImage(
+									Datas.mSaleHouses.get(position).promote_pic,
+									imageView);
+							typeImageView
+									.setImageResource(R.drawable.marker_sale);
+
+							textAddress.setText(Datas.mSaleHouses.get(position).address);
+							textTitle.setText(Datas.mSaleHouses.get(position).title);
+
+							String moneyString = "<font size=\"3\" color=\"red\">"
+									+ Integer.toString(Datas.mSaleHouses
+											.get(position).price)
+									+ "萬"
+									+ "</font>"
+									+ ",&nbsp;"
+									+ "<font size=\"3\" color=\"black\">"
+									+ InfoParserApi
+											.parseRentArea(Datas.mSaleHouses
+													.get(position).total_area)
+									+ "坪" + "</font>";
+							textMoney.setText(Html.fromHtml(moneyString));
+
+							String typeString = "<font size=\"3\" color=\"black\">"
+									+ InfoParserApi.parseGroundType(Datas.mSaleHouses
+											.get(position).ground_type_id);
+
+							if (InfoParserApi.parseRoomArrangement(
+									Datas.mSaleHouses.get(position).rooms, 0,
+									Datas.mSaleHouses.get(position).rest_rooms,
+									0) != "")
+							{
+								typeString = typeString
+										+ ",&nbsp;"
+										+ InfoParserApi.parseRoomArrangement(
+												Datas.mSaleHouses.get(position).rooms,
+												0,
+												Datas.mSaleHouses.get(position).rest_rooms,
+												0);
+							}
+
+							if (InfoParserApi.parseLayers(
+									Datas.mSaleHouses.get(position).layer,
+									Datas.mSaleHouses.get(position).total_layer) != "")
+							{
+								typeString = typeString
+										+ ",&nbsp;"
+										+ InfoParserApi.parseLayers(
+												Datas.mSaleHouses.get(position).layer,
+												Datas.mSaleHouses.get(position).total_layer);
+							}
+
+							typeString = typeString + "</font>";
+
+							textRentType.setText(Html.fromHtml(typeString));
+
+							setAroundSaleHouses(position);
+							if (aroundSaleHouses.size() > 1)
+							{
+								linearInfoSwitch.setVisibility(View.VISIBLE);
+							} else
+							{
+								linearInfoSwitch.setVisibility(View.GONE);
+							}
+						}
+
+					} catch (Exception e)
 					{
-						typeString = typeString
-								+ ",&nbsp;"
-								+ InfoParserApi.parseLayers(
-										Datas.mRentHouses.get(position).layer,
-										Datas.mRentHouses.get(position).total_layer);
-					}
-
-					typeString = typeString + "</font>";
-
-					textRentType.setText(Html.fromHtml(typeString));
-
-					setAroundRentHouses(position);
-
-					// Toast.makeText(
-					// MainActivity.this,
-					// "附近" + Integer.toString(aroundRentHouses.size())
-					// + "間", Toast.LENGTH_SHORT).show();
-
-					if (aroundRentHouses.size() > 1)
-					{
-						linearInfoSwitch.setVisibility(View.VISIBLE);
-					} else
-					{
-						linearInfoSwitch.setVisibility(View.GONE);
+						Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位",
+								Toast.LENGTH_SHORT).show();
 					}
 
 					return true;
+				}
+
+				private void setAroundSaleHouses(int position)
+				{
+					aroundSaleHouses.clear();
+					aroudMarkers.clear();
+					House pickedHouse = Datas.mSaleHouses.get(position);
+					Location pickedLocation = new Location("");
+					pickedLocation.setLatitude(pickedHouse.y_lat);
+					pickedLocation.setLongitude(pickedHouse.x_long);
+
+					for (int i = 0; i < Datas.mSaleHouses.size(); i++)
+					{
+						House item = Datas.mSaleHouses.get(i);
+						Location itemLocation = new Location("");
+						itemLocation.setLatitude(item.y_lat);
+						itemLocation.setLongitude(item.x_long);
+						float dis_meters = itemLocation
+								.distanceTo(pickedLocation);
+						if (dis_meters < 10)
+						{
+							if (item.title.equals(pickedHouse.title))
+							{
+								currentPosition = aroundSaleHouses.size();
+							}
+							aroundSaleHouses.add(item);
+							// i + Datas.mRentHouses.size() because sale maker add after rent
+							aroudMarkers.add(mMarkers.get(i+Datas.mRentHouses.size()));
+						}
+					}
+
+					infoNumsTextView.setText(Integer
+							.toString(currentPosition + 1)
+							+ " / "
+							+ Integer.toString(aroundSaleHouses.size()));
 				}
 
 				private void setAroundRentHouses(int position)
@@ -972,7 +1216,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		}
 	}
 
-	protected class GetRentHouseTask extends AsyncTask<Void, Void, Void>
+	protected class GetRentHouseTask extends AsyncTask<Void, Integer, Integer>
 	{
 
 		@Override
@@ -980,23 +1224,29 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		{
 			super.onPreExecute();
 			// linearTitleLayout.setVisibility(View.VISIBLE);
-			isRentHouseTaskRunning = true;
 			showProgress();
 		}
 
 		@Override
-		protected Void doInBackground(Void... Void)
+		protected Integer doInBackground(Void... Void)
 		{
 
-			HouseApi.getAroundAmenities("111", 25.05535, 121.4588);
+			// HouseApi.getAroundAmenities("111", 25.05535, 121.4588);
 
 			try
 			{
 				Datas.mRentHouses.clear();
+				Datas.mSaleHouses.clear();
 			} catch (Exception e)
 			{
 				// TODO: handle exception
 			}
+
+			Boolean is_rent_show = Setting.getBooleanSetting(
+					Setting.KeyIsShowRent, MainActivity.this);
+
+			Boolean is_sale_show = Setting.getBooleanSetting(
+					Setting.KeyIsShowSale, MainActivity.this);
 
 			String rpMinString = Setting.getSetting(
 					Setting.keyRentHousePriceMin, MainActivity.this);
@@ -1010,6 +1260,18 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			{
 				rpMaxString = null;
 			}
+			String hp_min = Setting.getSetting(Setting.keyHousePriceMin,
+					MainActivity.this);
+			if (hp_min.equals("0"))
+			{
+				hp_min = null;
+			}
+			String hp_max = Setting.getSetting(Setting.keyHousePriceMax,
+					MainActivity.this);
+			if (hp_max.equals("0"))
+			{
+				hp_max = null;
+			}
 			String areaMinString = Setting.getSetting(Setting.keyAreaMin,
 					MainActivity.this);
 			if (areaMinString.equals("0"))
@@ -1022,53 +1284,114 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			{
 				areaMaxString = null;
 			}
+			String age_min = Setting.getSetting(Setting.keyAgeMin,
+					MainActivity.this);
+			if (age_min.equals("0"))
+			{
+				age_min = null;
+			}
+			String age_max = Setting.getSetting(Setting.keyAgeMax,
+					MainActivity.this);
+			if (age_max.equals("0"))
+			{
+				age_max = null;
+			}
+
 			String rentTypeString = Setting.getSetting(Setting.keyRentType,
 					MainActivity.this);
 			if (rentTypeString.equals("0"))
 			{
 				rentTypeString = null;
 			}
-			String buildingTypeString = Setting.getSetting(
-					Setting.keyBuildingType, MainActivity.this);
-			if (buildingTypeString.equals("0"))
+			String saleTypeString = Setting.getSetting(
+					Setting.keySaleType, MainActivity.this);
+			if (saleTypeString.equals("0"))
 			{
-				buildingTypeString = null;
+				saleTypeString = null;
 			}
 
-			Datas.mRentHouses = HouseApi.getAroundRentsByAreas(
-					AppConstants.km_dis, AppConstants.currentLatLng.longitude,
+			Boolean isGetData = HouseApi2.getAroundRentsAndHouses(is_rent_show,
+					is_sale_show, AppConstants.km_dis,
+					AppConstants.currentLatLng.longitude,
 					AppConstants.currentLatLng.latitude, rpMinString,
-					rpMaxString, areaMinString, areaMaxString, rentTypeString,
-					buildingTypeString);
+					rpMaxString, hp_min, hp_max, areaMinString, areaMaxString,
+					age_min, age_max, rentTypeString, saleTypeString);
+			if (isGetData)
+			{
+				return 1;
+			} else
+			{
+				return 0;
+			}
 
-			return null;
 		}
 
 		@Override
-		protected void onPostExecute(Void result)
+		protected void onPostExecute(Integer isDataGet)
 		{
 			endProgress();
-			isRentHouseTaskRunning = false;
-			// linearTitleLayout.setVisibility(View.INVISIBLE);
-			if (Datas.mRentHouses != null && Datas.mRentHouses.size() != 0)
+			Boolean is_rent_show = Setting.getBooleanSetting(
+					Setting.KeyIsShowRent, MainActivity.this);
+
+			Boolean is_sale_show = Setting.getBooleanSetting(
+					Setting.KeyIsShowSale, MainActivity.this);
+
+			if (isDataGet == 1)
 			{
 
-				Datas.mRentHouseMap = getRentHouseMap(Datas.mRentHouses);
-				titleRentTextView.setText("出租 x "
-						+ Integer.toString(Datas.mRentHouses.size()));
-				new addMarkerTask().execute();
+				if (is_rent_show)
+				{
+					titleRentImageView.setVisibility(View.VISIBLE);
+					titleRentTextView.setVisibility(View.VISIBLE);
+					titleRentTextView.setText("出租 x "
+							+ Integer.toString(Datas.mRentHouses.size()));
+				} else
+				{
+					titleRentImageView.setVisibility(View.GONE);
+					titleRentTextView.setVisibility(View.GONE);
+				}
 
+				if (is_sale_show)
+				{
+					titleSaleImageView.setVisibility(View.VISIBLE);
+					titleSaleTextView.setVisibility(View.VISIBLE);
+					titleSaleTextView.setText("出售 x "
+							+ Integer.toString(Datas.mSaleHouses.size()));
+				} else
+				{
+					titleSaleImageView.setVisibility(View.GONE);
+					titleSaleTextView.setVisibility(View.GONE);
+				}
+
+				new addMarkerTask().execute();
 			} else
 			{
-				// Datas.mEstates = new ArrayList<RealEstate>();
-				// Datas.mEstatesMap = getRealEstatesMap(Datas.mEstates);
-
 				new addMarkerTask().execute();
 
 				Toast.makeText(MainActivity.this, "無資料~", Toast.LENGTH_SHORT)
 						.show();
-				titleRentTextView.setText("出租 x 0");
-				// titleTextView.setText("無資料~");
+				if (is_rent_show)
+				{
+					titleRentImageView.setVisibility(View.VISIBLE);
+					titleRentTextView.setVisibility(View.VISIBLE);
+					titleRentTextView.setText("出租 x 0");
+				} else
+				{
+					titleRentImageView.setVisibility(View.GONE);
+					titleRentTextView.setVisibility(View.GONE);
+				}
+
+				if (is_sale_show)
+				{
+					titleSaleImageView.setVisibility(View.VISIBLE);
+					titleSaleTextView.setVisibility(View.VISIBLE);
+					titleSaleTextView.setText("出售 x 0");
+				} else
+				{
+					titleSaleImageView.setVisibility(View.GONE);
+					titleSaleTextView.setVisibility(View.GONE);
+				}
+
 			}
 
 		}
@@ -1111,33 +1434,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 	}
 
-	private TreeMap<String, ArrayList<RentHouse>> getRentHouseMap(
-			ArrayList<RentHouse> rentHouses)
-	{
-
-		TreeMap<String, ArrayList<RentHouse>> rentHouseMap = new TreeMap<String, ArrayList<RentHouse>>();
-		for (int i = 0; i < rentHouses.size(); i++)
-		{
-			RentHouse rentHouse = rentHouses.get(i);
-			String realEstateKey = Integer.toString(rentHouse.rent_type_id);
-			// 先確認key是否存在
-			if (rentHouseMap.containsKey(realEstateKey))
-			{
-				// 已經有的話就把movie加進去
-				((ArrayList<RentHouse>) rentHouseMap.get(realEstateKey))
-						.add(rentHouse);
-			} else
-			{
-				// 沒有的話就建一個加進去
-				ArrayList<RentHouse> newRealEstateList = new ArrayList<RentHouse>(
-						10);
-				newRealEstateList.add(rentHouse);
-				rentHouseMap.put(realEstateKey, newRealEstateList);
-			}
-		}
-		return rentHouseMap;
-	}
-
 	private void showProgress()
 	{
 		linearProgressLayout.setVisibility(View.VISIBLE);
@@ -1153,47 +1449,101 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 		mMarkers.clear();
 
-		for (int i = 0; i < Datas.mRentHouses.size(); i++)
+		try
 		{
-			LatLng newLatLng = new LatLng(Datas.mRentHouses.get(i).y_lat,
-					Datas.mRentHouses.get(i).x_long);
 
-			View layout = inflater.inflate(R.layout.item_marker, null);
-			layout.setLayoutParams(new LinearLayout.LayoutParams(
-					LinearLayout.LayoutParams.WRAP_CONTENT,
-					LinearLayout.LayoutParams.WRAP_CONTENT));
-			ImageView markerView = (ImageView) layout
-					.findViewById(R.id.image_marker);
-			TextView markerText = (TextView) layout
-					.findViewById(R.id.text_marker_price);
-			TextView markerTypeText = (TextView) layout
-					.findViewById(R.id.text_rent_type);
-
-			String rentType = InfoParserApi.parseRentType(Datas.mRentHouses
-					.get(i).rent_type_id);
-			rentType = rentType.substring(0, 1);
-			markerTypeText.setText(rentType);
-
-			// for later marker info window use
-			MarkerOptions marker = new MarkerOptions().position(newLatLng)
-					.title(Integer.toString(i));
-
-			double rentPrice = ((double) Datas.mRentHouses.get(i).price) / 1000;
-			String rentPriceString = Double.toString(rentPrice);
-			if (rentPriceString.indexOf(".0") != -1)
+			for (int i = 0; i < Datas.mRentHouses.size(); i++)
 			{
-				rentPriceString = rentPriceString.substring(0, rentPriceString.indexOf(".0"));
+				LatLng newLatLng = new LatLng(Datas.mRentHouses.get(i).y_lat,
+						Datas.mRentHouses.get(i).x_long);
+
+				View layout = inflater.inflate(R.layout.item_marker, null);
+				layout.setLayoutParams(new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.WRAP_CONTENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT));
+				ImageView markerView = (ImageView) layout
+						.findViewById(R.id.image_marker);
+				TextView markerText = (TextView) layout
+						.findViewById(R.id.text_marker_price);
+				TextView markerTypeText = (TextView) layout
+						.findViewById(R.id.text_rent_type);
+
+				String rentType = InfoParserApi.parseRentType(Datas.mRentHouses
+						.get(i).rent_type_id);
+				rentType = rentType.substring(0, 1);
+				markerTypeText.setText(rentType);
+
+				// for later marker info window use
+				MarkerOptions marker = new MarkerOptions().position(newLatLng)
+						.title("rent_" + Integer.toString(i));
+
+				double rentPrice = ((double) Datas.mRentHouses.get(i).price) / 1000;
+				String rentPriceString = Double.toString(rentPrice);
+				if (rentPriceString.indexOf(".0") != -1)
+				{
+					rentPriceString = rentPriceString.substring(0,
+							rentPriceString.indexOf(".0"));
+				}
+				markerText.setText(rentPriceString + "k");
+
+				markerView.setImageResource(R.drawable.marker_rent);
+
+				Bitmap bm = loadBitmapFromView(layout);
+
+				// Changing marker icon
+				marker.icon(BitmapDescriptorFactory.fromBitmap(bm));
+
+				mMarkers.add(marker);
 			}
-			markerText.setText(rentPriceString + "k");
 
-			markerView.setImageResource(R.drawable.marker_rent);
+			for (int i = 0; i < Datas.mSaleHouses.size(); i++)
+			{
+				LatLng newLatLng = new LatLng(Datas.mSaleHouses.get(i).y_lat,
+						Datas.mSaleHouses.get(i).x_long);
 
-			Bitmap bm = loadBitmapFromView(layout);
+				View layout = inflater.inflate(R.layout.item_marker, null);
+				layout.setLayoutParams(new LinearLayout.LayoutParams(
+						LinearLayout.LayoutParams.WRAP_CONTENT,
+						LinearLayout.LayoutParams.WRAP_CONTENT));
+				ImageView markerView = (ImageView) layout
+						.findViewById(R.id.image_marker);
+				TextView markerText = (TextView) layout
+						.findViewById(R.id.text_marker_price);
+				TextView markerTypeText = (TextView) layout
+						.findViewById(R.id.text_rent_type);
 
-			// Changing marker icon
-			marker.icon(BitmapDescriptorFactory.fromBitmap(bm));
+				String groundType = InfoParserApi
+						.parseGroundType(Datas.mSaleHouses.get(i).ground_type_id);
+				groundType = groundType.substring(0, 1);
+				markerTypeText.setText(groundType);
 
-			mMarkers.add(marker);
+				// for later marker info window use
+				MarkerOptions marker = new MarkerOptions().position(newLatLng)
+						.title("sale_" + Integer.toString(i));
+
+				double rentPrice = ((double) Datas.mSaleHouses.get(i).price);
+				String rentPriceString = Double.toString(rentPrice);
+				if (rentPriceString.indexOf(".0") != -1)
+				{
+					rentPriceString = rentPriceString.substring(0,
+							rentPriceString.indexOf(".0"));
+				}
+				markerText.setText(rentPriceString + "萬");
+
+				markerView.setImageResource(R.drawable.marker_sale);
+
+				Bitmap bm = loadBitmapFromView(layout);
+
+				// Changing marker icon
+				marker.icon(BitmapDescriptorFactory.fromBitmap(bm));
+
+				mMarkers.add(marker);
+			}
+
+		} catch (Exception e)
+		{
+			Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位",
+					Toast.LENGTH_SHORT).show();
 		}
 
 	}
@@ -1357,7 +1707,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 										"button_press", "filter_button2", null)
 										.build());
 						Intent intent = new Intent();
-						intent.setClass(MainActivity.this, FilterActivity.class);
+						intent.setClass(MainActivity.this, FilterNewActivity.class);
 						startActivity(intent);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
@@ -1407,10 +1757,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						Intent it = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(it);
-						// Setting.saveBooleanSetting(Setting.KeyGiveStar, true,
-						// MainActivity.this);
-						// Setting.saveBooleanSetting(Setting.KeyPushStarDialog,
-						// false, MainActivity.this);
 						break;
 					case 9:
 						// about us
@@ -1435,7 +1781,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if (mDrawerToggle.onOptionsItemSelected(getMenuItem(item)))
+		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud
+				.getMenuItem(item)))
 		{
 			return true;
 		} else
@@ -1457,265 +1804,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			}
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	private android.view.MenuItem getMenuItem(final MenuItem item)
-	{
-		return new android.view.MenuItem()
-		{
-			@Override
-			public int getItemId()
-			{
-				return item.getItemId();
-			}
-
-			public boolean isEnabled()
-			{
-				return true;
-			}
-
-			@Override
-			public boolean collapseActionView()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean expandActionView()
-			{
-				return false;
-			}
-
-			@Override
-			public ActionProvider getActionProvider()
-			{
-				return null;
-			}
-
-			@Override
-			public View getActionView()
-			{
-				return null;
-			}
-
-			@Override
-			public char getAlphabeticShortcut()
-			{
-				return 0;
-			}
-
-			@Override
-			public int getGroupId()
-			{
-				return 0;
-			}
-
-			@Override
-			public Drawable getIcon()
-			{
-				return null;
-			}
-
-			@Override
-			public Intent getIntent()
-			{
-				return null;
-			}
-
-			@Override
-			public ContextMenuInfo getMenuInfo()
-			{
-				return null;
-			}
-
-			@Override
-			public char getNumericShortcut()
-			{
-				return 0;
-			}
-
-			@Override
-			public int getOrder()
-			{
-				return 0;
-			}
-
-			@Override
-			public SubMenu getSubMenu()
-			{
-				return null;
-			}
-
-			@Override
-			public CharSequence getTitle()
-			{
-				return null;
-			}
-
-			@Override
-			public CharSequence getTitleCondensed()
-			{
-				return null;
-			}
-
-			@Override
-			public boolean hasSubMenu()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean isActionViewExpanded()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean isCheckable()
-			{
-				return false;
-			}
-
-			@Override
-			public boolean isChecked()
-			{
-
-				return false;
-			}
-
-			@Override
-			public boolean isVisible()
-			{
-				return false;
-			}
-
-			@Override
-			public android.view.MenuItem setActionProvider(
-					ActionProvider actionProvider)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setActionView(View view)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setActionView(int resId)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setAlphabeticShortcut(char alphaChar)
-			{
-
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setCheckable(boolean checkable)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setChecked(boolean checked)
-			{
-
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setEnabled(boolean enabled)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIcon(Drawable icon)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIcon(int iconRes)
-			{
-
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setIntent(Intent intent)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setNumericShortcut(char numericChar)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setOnActionExpandListener(
-					OnActionExpandListener listener)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setOnMenuItemClickListener(
-					OnMenuItemClickListener menuItemClickListener)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setShortcut(char numericChar,
-					char alphaChar)
-			{
-				return null;
-			}
-
-			@Override
-			public void setShowAsAction(int actionEnum)
-			{
-
-			}
-
-			@Override
-			public android.view.MenuItem setShowAsActionFlags(int actionEnum)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitle(CharSequence title)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitle(int title)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setTitleCondensed(CharSequence title)
-			{
-				return null;
-			}
-
-			@Override
-			public android.view.MenuItem setVisible(boolean visible)
-			{
-				return null;
-			}
-		};
 	}
 
 	@Override

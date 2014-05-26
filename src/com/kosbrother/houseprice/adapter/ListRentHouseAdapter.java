@@ -71,9 +71,12 @@ public class ListRentHouseAdapter extends BaseAdapter
 				.findViewById(R.id.rent_list_type_text);
 
 		ImageView imageView = (ImageView) vi.findViewById(R.id.rent_list_image);
+		ImageView typeImageView = (ImageView) vi
+				.findViewById(R.id.rent_type_image);
 
 		imageLoader.DisplayImage(data.get(position).promote_pic, imageView);
-
+		typeImageView.setImageResource(R.drawable.marker_rent);
+		
 		textAddress.setText(data.get(position).address);
 		textTitle.setText(data.get(position).title);
 
@@ -114,7 +117,7 @@ public class ListRentHouseAdapter extends BaseAdapter
 
 				Intent intent = new Intent(activity, DetailActivity.class);
 				Bundle bundle = new Bundle();
-				bundle.putInt("ItemPosition", position);
+				bundle.putString("type_num", "rent_"+Integer.toString(position));
 				intent.putExtras(bundle);
 				activity.startActivity(intent);
 
