@@ -60,8 +60,11 @@ public class AmenitiesActivity extends FragmentActivity implements
 
 	private double house_x;
 	private double house_y;
+	private int rent_type;
 	private int house_type;
+	private int sale_type;
 	private int rent_price;
+	private int sale_price;
 	private LatLng houseLatLng;
 	private ArrayList<LandMark> mLandMarks = new ArrayList<LandMark>();
 
@@ -73,7 +76,7 @@ public class AmenitiesActivity extends FragmentActivity implements
 	private LayoutInflater inflater;
 
 	private ActionBar mActionBar;
-	
+
 	private RelativeLayout adBannerLayout;
 	private AdView adMobAdView;
 
@@ -89,8 +92,17 @@ public class AmenitiesActivity extends FragmentActivity implements
 		Bundle bundle = getIntent().getExtras();
 		house_x = bundle.getDouble("house_x");
 		house_y = bundle.getDouble("house_y");
-		house_type = bundle.getInt("rent_type");
-		rent_price = bundle.getInt("price");
+		house_type = bundle.getInt("house_type");
+		if (house_type == AppConstants.TYPE_ID_SALE)
+		{
+			sale_type = bundle.getInt("sale_type");
+			sale_price = bundle.getInt("price");
+		} else
+		{
+			rent_type = bundle.getInt("rent_type");
+			rent_price = bundle.getInt("price");
+		}
+
 		houseLatLng = new LatLng(house_y, house_x);
 
 		mActionBar = getActionBar();
@@ -110,7 +122,7 @@ public class AmenitiesActivity extends FragmentActivity implements
 		{
 			e.printStackTrace();
 		}
-		
+
 		CallAds();
 	}
 
@@ -361,29 +373,45 @@ public class AmenitiesActivity extends FragmentActivity implements
 		TextView markerTypeText = (TextView) layout
 				.findViewById(R.id.text_rent_type);
 
-		String rentType = InfoParserApi.parseRentType(house_type);
-		rentType = rentType.substring(0, 1);
-		markerTypeText.setText(rentType);
+		
 
 		// for later marker info window use
 		houseMarker = new MarkerOptions().position(houseLatLng).title("房屋所在地");
-		markerText.setText(Integer.toString(rent_price / 100) + "k");
+		if (house_type == AppConstants.TYPE_ID_SALE)
+		{
+			String groundType = InfoParserApi.parseGroundType(sale_type);
+			groundType = groundType.substring(0, 1);
+			markerTypeText.setText(groundType);
 
-		markerView.setImageResource(R.drawable.marker_rent);
+			String salePriceString = Integer.toString(sale_price);
+			markerText.setText(salePriceString + "萬");
 
-		Bitmap bm = loadBitmapFromView(layout);
+			markerView.setImageResource(R.drawable.marker_sale);
 
-		// Changing marker icon
-		houseMarker.icon(BitmapDescriptorFactory.fromBitmap(bm));
+			Bitmap bm = loadBitmapFromView(layout);
 
-		// TODO Auto-generated method stub
+			// Changing marker icon
+			houseMarker.icon(BitmapDescriptorFactory.fromBitmap(bm));
 
-		// houseMarker = new MarkerOptions().position(
-		// AppConstants.currentLatLng).draggable(true);
-		// houseMarker.icon(BitmapDescriptorFactory
-		// .fromResource(R.drawable.marker_rent));
-		// houseMarker.title("房屋所在地");
-		mGoogleMap.addMarker(houseMarker);
+			mGoogleMap.addMarker(houseMarker);
+
+		} else
+		{
+			String rentType = InfoParserApi.parseRentType(rent_type);
+			rentType = rentType.substring(0, 1);
+			markerTypeText.setText(rentType);
+			
+			markerText.setText(Integer.toString(rent_price / 100) + "k");
+
+			markerView.setImageResource(R.drawable.marker_rent);
+
+			Bitmap bm = loadBitmapFromView(layout);
+
+			// Changing marker icon
+			houseMarker.icon(BitmapDescriptorFactory.fromBitmap(bm));
+			mGoogleMap.addMarker(houseMarker);
+		}
+
 	}
 
 	public static Bitmap loadBitmapFromView(View v)
@@ -514,7 +542,7 @@ public class AmenitiesActivity extends FragmentActivity implements
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	private void CallAds()
 	{
 		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
@@ -551,5 +579,5 @@ public class AmenitiesActivity extends FragmentActivity implements
 			});
 		}
 	}
-	
+
 }

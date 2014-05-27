@@ -446,11 +446,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 						String paramsString = aroudMarkers
 								.get(currentPosition).getTitle();
-//						String positionString = paramsString
-//								.substring(paramsString.indexOf("_") + 1);
-//						int position = Integer.valueOf(positionString);
-//						String type = paramsString.substring(0,
-//								paramsString.indexOf("_"));
 						
 						Intent intent = new Intent(MainActivity.this,
 								DetailActivity.class);
@@ -465,16 +460,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 					}
 
 				}
-
-//				int position = Integer.valueOf(aroudMarkers
-//						.get(currentPosition).getTitle());
-//
-//				Intent intent = new Intent(MainActivity.this,
-//						DetailActivity.class);
-//				Bundle bundle = new Bundle();
-//				bundle.putInt("ItemPosition", position);
-//				intent.putExtras(bundle);
-//				startActivity(intent);
 			}
 		});
 

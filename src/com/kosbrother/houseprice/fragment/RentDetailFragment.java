@@ -404,6 +404,7 @@ public class RentDetailFragment extends Fragment
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theRentHouse.x_long);
 					bundle.putDouble("house_y", theRentHouse.y_lat);
+					bundle.putInt("house_type", AppConstants.TYPE_ID_RENT);
 					bundle.putInt("rent_type", theRentHouse.rent_type_id);
 					bundle.putInt("price", theRentHouse.price);
 					intent.putExtras(bundle);
@@ -483,24 +484,12 @@ public class RentDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					// double latitude = theRentHouse.y_lat;
-					// double longitude = theRentHouse.x_long;
-					// String label = theRentHouse.title;
-					// String uriBegin = "geo:" + latitude + "," + longitude;
-					// String query = latitude + "," + longitude + "(" + label
-					// + ")";
-					// String encodedQuery = Uri.encode(query);
-					// String uriString = uriBegin + "?q=" + encodedQuery
-					// + "&z=16";
-					// Uri uri = Uri.parse(uriString);
-					// Intent intent = new Intent(
-					// android.content.Intent.ACTION_VIEW, uri);
-					// startActivity(intent);
 					Intent intent = new Intent(getActivity(),
 							AmenitiesActivity.class);
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theRentHouse.x_long);
 					bundle.putDouble("house_y", theRentHouse.y_lat);
+					bundle.putInt("house_type", AppConstants.TYPE_ID_RENT);
 					bundle.putInt("rent_type", theRentHouse.rent_type_id);
 					bundle.putInt("price", theRentHouse.price);
 					intent.putExtras(bundle);

@@ -366,7 +366,8 @@ public class SaleDetailFragment extends Fragment
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theSaleHouse.x_long);
 					bundle.putDouble("house_y", theSaleHouse.y_lat);
-					bundle.putInt("ground_type", theSaleHouse.ground_type_id);
+					bundle.putInt("house_type", AppConstants.TYPE_ID_SALE);
+					bundle.putInt("sale_type", theSaleHouse.ground_type_id);
 					bundle.putInt("price", theSaleHouse.price);
 					intent.putExtras(bundle);
 					startActivity(intent);
@@ -450,7 +451,8 @@ public class SaleDetailFragment extends Fragment
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theSaleHouse.x_long);
 					bundle.putDouble("house_y", theSaleHouse.y_lat);
-					bundle.putInt("ground_type", theSaleHouse.ground_type_id);
+					bundle.putInt("house_type", AppConstants.TYPE_ID_SALE);
+					bundle.putInt("sale_type", theSaleHouse.ground_type_id);
 					bundle.putInt("price", theSaleHouse.price);
 					intent.putExtras(bundle);
 					startActivity(intent);

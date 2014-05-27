@@ -407,7 +407,8 @@ public class DetailFavoriteFragment extends Fragment
 				Bundle bundle = new Bundle();
 				bundle.putDouble("house_x", theHouse.x_long);
 				bundle.putDouble("house_y", theHouse.y_lat);
-				bundle.putInt("ground_type", theHouse.ground_type_id);
+				bundle.putInt("house_type", AppConstants.TYPE_ID_SALE);
+				bundle.putInt("sale_type", theHouse.ground_type_id);
 				bundle.putInt("price", theHouse.price);
 				intent.putExtras(bundle);
 				startActivity(intent);
@@ -488,7 +489,8 @@ public class DetailFavoriteFragment extends Fragment
 				Bundle bundle = new Bundle();
 				bundle.putDouble("house_x", theHouse.x_long);
 				bundle.putDouble("house_y", theHouse.y_lat);
-				bundle.putInt("ground_type", theHouse.ground_type_id);
+				bundle.putInt("house_type", AppConstants.TYPE_ID_SALE);
+				bundle.putInt("sale_type", theHouse.ground_type_id);
 				bundle.putInt("price", theHouse.price);
 				intent.putExtras(bundle);
 				startActivity(intent);
@@ -727,6 +729,7 @@ public class DetailFavoriteFragment extends Fragment
 				Bundle bundle = new Bundle();
 				bundle.putDouble("house_x", theRentHouse.x_long);
 				bundle.putDouble("house_y", theRentHouse.y_lat);
+				bundle.putInt("house_type", AppConstants.TYPE_ID_RENT);
 				bundle.putInt("rent_type", theRentHouse.rent_type_id);
 				bundle.putInt("price", theRentHouse.price);
 				intent.putExtras(bundle);
@@ -805,6 +808,7 @@ public class DetailFavoriteFragment extends Fragment
 				Bundle bundle = new Bundle();
 				bundle.putDouble("house_x", theRentHouse.x_long);
 				bundle.putDouble("house_y", theRentHouse.y_lat);
+				bundle.putInt("house_type", AppConstants.TYPE_ID_RENT);
 				bundle.putInt("rent_type", theRentHouse.rent_type_id);
 				bundle.putInt("price", theRentHouse.price);
 				intent.putExtras(bundle);
