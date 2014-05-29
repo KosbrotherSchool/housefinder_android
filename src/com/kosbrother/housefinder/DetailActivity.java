@@ -49,8 +49,7 @@ public class DetailActivity extends FragmentActivity
 		Bundle bundle = getIntent().getExtras();
 
 		String paramsString = bundle.getString("type_num");
-		String positionString = paramsString.substring(paramsString
-				.indexOf("_") + 1);
+		String positionString = paramsString.substring(paramsString.indexOf("_") + 1);
 		int position = Integer.valueOf(positionString);
 		String type = paramsString.substring(0, paramsString.indexOf("_"));
 		typeId = InfoParserApi.parseTypeId(type);
@@ -88,8 +87,7 @@ public class DetailActivity extends FragmentActivity
 			mActionBar.setDisplayHomeAsUpEnabled(true);
 			mActionBar.setHomeButtonEnabled(true);
 		}
-		mActionBar.setTitle("第" + Integer.toString(position + 1) + "/"
-				+ Integer.toString(NUM_ITEMS) + "筆資料");
+		mActionBar.setTitle("第" + Integer.toString(position + 1) + "/" + Integer.toString(NUM_ITEMS) + "筆資料");
 
 		mPager.setOnPageChangeListener(new OnPageChangeListener()
 		{
@@ -98,11 +96,9 @@ public class DetailActivity extends FragmentActivity
 			public void onPageSelected(int current_position)
 			{
 				// TODO Auto-generated method stub
-				Log.i("DetailActivity", "current_position = "
-						+ current_position);
-				mActionBar.setTitle("第"
-						+ Integer.toString(current_position + 1) + "/"
-						+ Integer.toString(NUM_ITEMS) + "筆資料");
+				Log.i("DetailActivity", "current_position = " + current_position);
+				mActionBar.setTitle("第" + Integer.toString(current_position + 1) + "/" + Integer.toString(NUM_ITEMS)
+						+ "筆資料");
 			}
 
 			@Override
@@ -142,12 +138,10 @@ public class DetailActivity extends FragmentActivity
 
 			if (typeId == 1)
 			{
-				mFragment = SaleDetailFragment.newInstance(position,
-						DetailActivity.this);
+				mFragment = SaleDetailFragment.newInstance(position, DetailActivity.this);
 			} else if (typeId == 2)
 			{
-				mFragment = RentDetailFragment.newInstance(position,
-						DetailActivity.this);
+				mFragment = RentDetailFragment.newInstance(position, DetailActivity.this);
 			}
 
 			return mFragment;
@@ -164,11 +158,16 @@ public class DetailActivity extends FragmentActivity
 			return true;
 		case R.id.menu_report:
 			int currentNum = mPager.getCurrentItem();
-			String title = Datas.mRentHouses.get(currentNum).title
-					+ "(編號:"
-					+ Integer
-							.toString(Datas.mRentHouses.get(currentNum).rent_id)
-					+ ")";
+			String title = "";
+			if (typeId == AppConstants.TYPE_ID_SALE)
+			{
+				title = Datas.mSaleHouses.get(currentNum).title + "(出售編號:"
+						+ Integer.toString(Datas.mSaleHouses.get(currentNum).house_id) + ")";
+			} else if (typeId == AppConstants.TYPE_ID_RENT)
+			{
+				title = Datas.mRentHouses.get(currentNum).title + "(出租編號:"
+						+ Integer.toString(Datas.mRentHouses.get(currentNum).rent_id) + ")";
+			}
 			ProblemReport.createReportDialog(this, title, "");
 			return true;
 		case R.id.menu_up:
@@ -228,16 +227,14 @@ public class DetailActivity extends FragmentActivity
 	{
 		if (databaseHelper == null)
 		{
-			databaseHelper = OpenHelperManager.getHelper(this,
-					DatabaseHelper.class);
+			databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
 		}
 		return databaseHelper;
 	}
 
 	private void CallAds()
 	{
-		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
-				DetailActivity.this);
+		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar, DetailActivity.this);
 
 		if (!isGivenStar)
 		{
@@ -292,8 +289,7 @@ public class DetailActivity extends FragmentActivity
 	protected void onResume()
 	{
 		super.onResume();
-		if ((typeId == 2 && Datas.mRentHouses.size() == 0)
-				|| (typeId == 1 && Datas.mSaleHouses.size() == 0))
+		if ((typeId == 2 && Datas.mRentHouses.size() == 0) || (typeId == 1 && Datas.mSaleHouses.size() == 0))
 		{
 			finish();
 		}
