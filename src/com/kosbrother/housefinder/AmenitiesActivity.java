@@ -50,9 +50,8 @@ import com.kosbrother.houseprice.entity.LandMark;
 import com.kosbrother.houseprice.fragment.TransparentSupportMapFragment;
 
 @SuppressLint("NewApi")
-public class AmenitiesActivity extends FragmentActivity implements
-		LocationListener, GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener
+public class AmenitiesActivity extends FragmentActivity implements LocationListener,
+		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener
 {
 
 	private LocationClient mLocationClient;
@@ -115,9 +114,7 @@ public class AmenitiesActivity extends FragmentActivity implements
 		mLocationClient = new LocationClient(this, this, this);
 		try
 		{
-			// Loading map
 			initilizeMap();
-			// mWrapperLayout.init(googleMap, getPixelsFromDp(this, 39 + 20));
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -142,21 +139,16 @@ public class AmenitiesActivity extends FragmentActivity implements
 	{
 		if (mGoogleMap == null)
 		{
-			mGoogleMap = ((TransparentSupportMapFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.map)).getMap();
+			mGoogleMap = ((TransparentSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+					.getMap();
 
-			// mLocationManager = (LocationManager)
-			// getSystemService(LOCATION_SERVICE);
-			// mGoogleMap.setMyLocationEnabled(true);
 			mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
 			mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
 			mGoogleMap.getUiSettings().setCompassEnabled(false);
 
 			if (mGoogleMap == null)
 			{
-				Toast.makeText(getApplicationContext(),
-						"Sorry! unable to create maps", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(getApplicationContext(), "Sorry! unable to create maps", Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -164,7 +156,6 @@ public class AmenitiesActivity extends FragmentActivity implements
 	@Override
 	protected void onStart()
 	{
-		// TODO Auto-generated method stub
 		super.onStart();
 		EasyTracker.getInstance(this).activityStart(this);
 		if (!mLocationClient.isConnected())
@@ -177,13 +168,11 @@ public class AmenitiesActivity extends FragmentActivity implements
 	public void onStop()
 	{
 		EasyTracker.getInstance(this).activityStop(this);
-		// // If the client is connected
+
 		if (mLocationClient.isConnected())
 		{
 			stopPeriodicUpdates();
 		}
-		//
-		// // After disconnect() is called, the client is considered "dead".
 		mLocationClient.disconnect();
 
 		super.onStop();
@@ -192,13 +181,11 @@ public class AmenitiesActivity extends FragmentActivity implements
 	private void stopPeriodicUpdates()
 	{
 		mLocationClient.removeLocationUpdates(this);
-		// mConnectionState.setText(R.string.location_updates_stopped);
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult arg0)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
@@ -212,7 +199,6 @@ public class AmenitiesActivity extends FragmentActivity implements
 	private void getLocation(int aniParam)
 	{
 
-		// If Google Play Services is available
 		if (servicesConnected())
 		{
 			boolean isNeedChangeMap = false;
@@ -225,12 +211,10 @@ public class AmenitiesActivity extends FragmentActivity implements
 				if (0 < AppConstants.km_dis && AppConstants.km_dis <= 0.3)
 				{
 					mapSize = 16.5f;
-				} else if (0.3 < AppConstants.km_dis
-						&& AppConstants.km_dis <= 0.5)
+				} else if (0.3 < AppConstants.km_dis && AppConstants.km_dis <= 0.5)
 				{
 					mapSize = 16.0f;
-				} else if (0.5 < AppConstants.km_dis
-						&& AppConstants.km_dis <= 1)
+				} else if (0.5 < AppConstants.km_dis && AppConstants.km_dis <= 1)
 				{
 					mapSize = 15.0f;
 				} else if (1 < AppConstants.km_dis && AppConstants.km_dis <= 2)
@@ -243,32 +227,27 @@ public class AmenitiesActivity extends FragmentActivity implements
 
 				if (aniParam == 0)
 				{
-					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-							houseLatLng, mapSize));
+					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(houseLatLng, mapSize));
 				} else
 				{
-					CameraPosition cameraPosition = new CameraPosition.Builder()
-							.target(houseLatLng).zoom(mapSize).build();
-					mGoogleMap.animateCamera(CameraUpdateFactory
-							.newCameraPosition(cameraPosition));
+					CameraPosition cameraPosition = new CameraPosition.Builder().target(houseLatLng).zoom(mapSize)
+							.build();
+					mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 				}
 			}
 
 			if (NetworkUtil.getConnectivityStatus(AmenitiesActivity.this) == 0)
 			{
-				AlertDialog.Builder dialog = new AlertDialog.Builder(
-						AmenitiesActivity.this);
+				AlertDialog.Builder dialog = new AlertDialog.Builder(AmenitiesActivity.this);
 				dialog.setTitle("無網路");
 				dialog.setMessage("偵測不到網路");
-				dialog.setPositiveButton("確定",
-						new DialogInterface.OnClickListener()
-						{
-							public void onClick(
-									DialogInterface dialoginterface, int i)
-							{
-								getLocation(0);
-							}
-						});
+				dialog.setPositiveButton("確定", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialoginterface, int i)
+					{
+						getLocation(0);
+					}
+				});
 				dialog.show();
 			} else
 			{
@@ -307,15 +286,13 @@ public class AmenitiesActivity extends FragmentActivity implements
 		protected void onPostExecute(Void result)
 		{
 			endProgress();
-			// linearTitleLayout.setVisibility(View.INVISIBLE);
 			if (mLandMarks != null && mLandMarks.size() != 0)
 			{
 				new addMarkerTask().execute();
 
 			} else
 			{
-				Toast.makeText(AmenitiesActivity.this, "無附近設施資料",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(AmenitiesActivity.this, "無附近設施資料", Toast.LENGTH_SHORT).show();
 			}
 
 		}
@@ -328,17 +305,15 @@ public class AmenitiesActivity extends FragmentActivity implements
 		@Override
 		protected void onPreExecute()
 		{
-			// TODO Auto-generated method stub
 			super.onPreExecute();
 			mGoogleMap.clear();
 			addHouseMarker();
-			// setTitleText(mPage);
 		}
 
 		@Override
 		protected Void doInBackground(Void... arg0)
 		{
-			// TODO Auto-generated method stub
+
 			setMapMark();
 			return null;
 		}
@@ -346,9 +321,6 @@ public class AmenitiesActivity extends FragmentActivity implements
 		@Override
 		protected void onPostExecute(Void result)
 		{
-			// Toast.makeText(MainActivity.this, Integer.toString(crawlDateNum),
-			// Toast.LENGTH_SHORT).show();
-
 			for (int i = 0; i < mMarkers.size(); i++)
 			{
 				mGoogleMap.addMarker(mMarkers.get(i));
@@ -363,36 +335,25 @@ public class AmenitiesActivity extends FragmentActivity implements
 		mGoogleMap.clear();
 
 		View layout = inflater.inflate(R.layout.item_marker, null);
-		layout.setLayoutParams(new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
+		layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
-		ImageView markerView = (ImageView) layout
-				.findViewById(R.id.image_marker);
-		TextView markerText = (TextView) layout
-				.findViewById(R.id.text_marker_price);
-		TextView markerTypeText = (TextView) layout
-				.findViewById(R.id.text_rent_type);
+		ImageView markerView = (ImageView) layout.findViewById(R.id.image_marker);
+		TextView markerText = (TextView) layout.findViewById(R.id.text_marker_price);
+		TextView markerTypeText = (TextView) layout.findViewById(R.id.text_rent_type);
 
-		
-
-		// for later marker info window use
 		houseMarker = new MarkerOptions().position(houseLatLng).title("房屋所在地");
+		
 		if (house_type == AppConstants.TYPE_ID_SALE)
 		{
 			String groundType = InfoParserApi.parseGroundType(sale_type);
 			groundType = groundType.substring(0, 1);
 			markerTypeText.setText(groundType);
-
 			String salePriceString = Integer.toString(sale_price);
 			markerText.setText(salePriceString + "萬");
-
 			markerView.setImageResource(R.drawable.marker_sale);
-
 			Bitmap bm = loadBitmapFromView(layout);
 
-			// Changing marker icon
 			houseMarker.icon(BitmapDescriptorFactory.fromBitmap(bm));
-
 			mGoogleMap.addMarker(houseMarker);
 
 		} else
@@ -400,14 +361,10 @@ public class AmenitiesActivity extends FragmentActivity implements
 			String rentType = InfoParserApi.parseRentType(rent_type);
 			rentType = rentType.substring(0, 1);
 			markerTypeText.setText(rentType);
-			
 			markerText.setText(Integer.toString(rent_price / 100) + "k");
-
 			markerView.setImageResource(R.drawable.marker_rent);
-
 			Bitmap bm = loadBitmapFromView(layout);
 
-			// Changing marker icon
 			houseMarker.icon(BitmapDescriptorFactory.fromBitmap(bm));
 			mGoogleMap.addMarker(houseMarker);
 		}
@@ -419,16 +376,14 @@ public class AmenitiesActivity extends FragmentActivity implements
 		if (v.getMeasuredHeight() <= 0)
 		{
 			v.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(),
-					v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+			Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 			Canvas c = new Canvas(b);
 			v.layout(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
 			v.draw(c);
 			return b;
 		}
 
-		Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width,
-				v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+		Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(b);
 		v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
 		v.draw(c);
@@ -442,39 +397,31 @@ public class AmenitiesActivity extends FragmentActivity implements
 
 		for (int i = 0; i < mLandMarks.size(); i++)
 		{
-			LatLng newLatLng = new LatLng(mLandMarks.get(i).y_lat,
-					mLandMarks.get(i).x_lng);
+			LatLng newLatLng = new LatLng(mLandMarks.get(i).y_lat, mLandMarks.get(i).x_lng);
 
 			// for later marker info window use
-			MarkerOptions marker = new MarkerOptions().position(newLatLng)
-					.title(mLandMarks.get(i).title);
+			MarkerOptions marker = new MarkerOptions().position(newLatLng).title(mLandMarks.get(i).title);
 
 			// Changing marker icon
 			switch (mLandMarks.get(i).type_id)
 			{
 			case 1:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_school));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_school));
 				break;
 			case 2:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_convenience_store));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_convenience_store));
 				break;
 			case 3:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_parks));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_parks));
 				break;
 			case 4:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_supermarket));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_supermarket));
 				break;
 			case 5:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_hospital));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_hospital));
 				break;
 			case 6:
-				marker.icon(BitmapDescriptorFactory
-						.fromResource(R.drawable.mark_station));
+				marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.mark_station));
 				break;
 
 			}
@@ -501,8 +448,7 @@ public class AmenitiesActivity extends FragmentActivity implements
 	{
 
 		// Check that Google Play services is available
-		int resultCode = GooglePlayServicesUtil
-				.isGooglePlayServicesAvailable(this);
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
 		// If Google Play services is available
 		if (ConnectionResult.SUCCESS == resultCode)
@@ -516,14 +462,12 @@ public class AmenitiesActivity extends FragmentActivity implements
 		} else
 		{
 			// Display an error dialog
-			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode,
-					this, 0);
+			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
 			if (dialog != null)
 			{
 				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
 				errorFragment.setDialog(dialog);
-				errorFragment.show(getSupportFragmentManager(),
-						LocationUtils.APPTAG);
+				errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
 			}
 			return false;
 		}
@@ -532,21 +476,18 @@ public class AmenitiesActivity extends FragmentActivity implements
 	@Override
 	public void onDisconnected()
 	{
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onLocationChanged(Location arg0)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
 	private void CallAds()
 	{
-		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
-				AmenitiesActivity.this);
+		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar, AmenitiesActivity.this);
 
 		if (!isGivenStar)
 		{

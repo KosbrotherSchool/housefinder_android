@@ -82,8 +82,8 @@ import com.kosbrother.imageloader.ImageLoader;
 
 @SuppressLint("NewApi")
 public class MainActivity extends FragmentActivity implements LocationListener,
-		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener, OnMapClickListener
+		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener,
+		OnMapClickListener
 {
 
 	private LocationClient mLocationClient;
@@ -93,11 +93,16 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public static boolean isBackFromFilter = false;
 	public static boolean isBackFromListFilterButton = false;
 	public static boolean isBackFromListGetLocationButton = false;
+	private final boolean RE_GET_LOCATION = true;
+	private final boolean NOT_RE_GET_LOCATION = false;
+	private final int ANIMATE_TO_LOCATION = 1;
+	private final int NOT_ANIMATE_TO_LOCATION = 0;
+
 	private static final int ID_SEARCH = 5;
 	private float mapSize;
 	private int currentMapTypePosition = 0;
 	private int currentPosition = 0;
-	private int infoType; // 1 for sale, 2 for rent
+	private int infoType;
 
 	private LayoutInflater inflater;
 	private ImageLoader imageLoader;
@@ -110,8 +115,8 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	private LinearLayout linearProgressLayout;
 	private ImageButton infoBackButton;
 	private ImageButton infoForwardbButton;
-	private ImageButton btnFocusButton;
-	private ImageButton btnLayerButton;
+	private ImageButton sideFocusButton;
+	private ImageButton sideLayerButton;
 	private TextView infoNumsTextView;
 	private TextView titleRentTextView;
 	private TextView titleSaleTextView;
@@ -137,8 +142,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.drawer_layout);
 
-		boolean isFirstOpen = Setting.getBooleanSetting(Setting.keyFirstOpenV2,
-				this);
+		boolean isFirstOpen = Setting.getBooleanSetting(Setting.keyFirstOpenV2, this);
 		if (isFirstOpen)
 		{
 			final LinearLayout firstLinearLayout = (LinearLayout) findViewById(R.id.first_teach_layout);
@@ -150,224 +154,39 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				@Override
 				public void onClick(View v)
 				{
-					Setting.saveBooleanSetting(Setting.keyFirstOpenV2, false,
-							MainActivity.this);
+					Setting.saveBooleanSetting(Setting.keyFirstOpenV2, false, MainActivity.this);
 					firstLinearLayout.setVisibility(View.GONE);
 				}
 			});
 		}
 
-		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
-		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
-		titleRentTextView = (TextView) findViewById(R.id.title_rent_text);
-		titleSaleTextView = (TextView) findViewById(R.id.title_sale_text);
-		linearProgressLayout = (LinearLayout) findViewById(R.id.linear_title_progress);
-		locationsButtonLayout = (LinearLayout) findViewById(R.id.linear_location_button);
-		linearFilter = (LinearLayout) findViewById(R.id.linear_filter);
-		mainRentLayout = (LinearLayout) findViewById(R.id.main_rent_layout);
-		linearInfoSwitch = (LinearLayout) findViewById(R.id.linear_info_switch);
-		infoBackButton = (ImageButton) findViewById(R.id.button_info_back);
-		infoForwardbButton = (ImageButton) findViewById(R.id.button_info_forward);
-		infoNumsTextView = (TextView) findViewById(R.id.text_info_nums);
-		linearInfoContent = (LinearLayout) findViewById(R.id.linear_info_contact);
-		titleRentImageView = (ImageView) findViewById(R.id.title_image_rent);
-		titleSaleImageView = (ImageView) findViewById(R.id.title_image_sale);
-
 		imageLoader = new ImageLoader(this, 100);
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
-				GravityCompat.START);
 
-		// enable ActionBar app icon to behave as action to toggle nav drawer
 		if (Build.VERSION.SDK_INT >= 14)
 		{
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 			getActionBar().setHomeButtonEnabled(true);
 		}
 
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-				R.drawable.ic_drawer, R.string.drawer_open,
-				R.string.drawer_close)
-		{
-			public void onDrawerClosed(View view)
-			{
-				// getSupportActionBar().setTitle(mTitle);
-				supportInvalidateOptionsMenu(); // creates call to
-												// onPrepareOptionsMenu()
-			}
-
-			public void onDrawerOpened(View drawerView)
-			{
-				// getSupportActionBar().setTitle(mDrawerTitle);
-				supportInvalidateOptionsMenu(); // creates call to
-												// onPrepareOptionsMenu()
-			}
-		};
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
-
+		findViewIDs();
 		setDrawerLayout();
-
-		btnFocusButton = (ImageButton) findViewById(R.id.image_btn_focus);
-		btnFocusButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				EasyTracker easyTracker = EasyTracker
-						.getInstance(MainActivity.this);
-				easyTracker.send(MapBuilder.createEvent("Button",
-						"button_press", "focus_button", null).build());
-				getLocation(true, 1);
-			}
-		});
-
-		btnLayerButton = (ImageButton) findViewById(R.id.image_btn_layers);
-		btnLayerButton.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-
-				EasyTracker easyTracker = EasyTracker
-						.getInstance(MainActivity.this);
-				easyTracker.send(MapBuilder.createEvent("Button",
-						"button_press", "layer_button", null).build());
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						MainActivity.this);
-				// Set the dialog title
-				builder.setTitle("顯示地圖").setSingleChoiceItems(R.array.map_type,
-						currentMapTypePosition,
-						new DialogInterface.OnClickListener()
-						{
-							@Override
-							public void onClick(DialogInterface dialog,
-									int position)
-							{
-								setMapTypeByPosition(position);
-								currentMapTypePosition = position;
-								dialog.cancel();
-							}
-
-							private void setMapTypeByPosition(int position)
-							{
-								switch (position)
-								{
-								case 0:
-									mGoogleMap
-											.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-									break;
-								case 1:
-									mGoogleMap
-											.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-									break;
-								case 2:
-									mGoogleMap
-											.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-									break;
-								default:
-									break;
-								}
-
-							}
-						});
-				builder.show();
-
-			}
-		});
+		setSideButtonsListener();
+		setBottomButtonsListener();
+		setPopUpInfoWindowListener();
 
 		mLocationClient = new LocationClient(this, this, this);
 		try
 		{
-			// Loading map
 			initilizeMap();
-			// mWrapperLayout.init(googleMap, getPixelsFromDp(this, 39 + 20));
 		} catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		locationsButtonLayout.setOnClickListener(new OnClickListener()
-		{
+	}
 
-			@Override
-			public void onClick(View arg0)
-			{
-				EasyTracker easyTracker = EasyTracker
-						.getInstance(MainActivity.this);
-				easyTracker.send(MapBuilder.createEvent("Button",
-						"button_press", "area locations button", null).build());
-				showCountyDialog();
-
-			}
-
-			private void showCountyDialog()
-			{
-				final ArrayList<County> mCounties = HouseApi.getCounties();
-				final String[] ListStr = new String[mCounties.size()];
-				for (int i = 0; i < mCounties.size(); i++)
-				{
-					ListStr[i] = mCounties.get(i).name;
-				}
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						MainActivity.this);
-				builder.setTitle("選擇地區");
-				builder.setItems(ListStr, new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int position)
-					{
-						showTownDialog(mCounties.get(position).id);
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-
-			private void showTownDialog(int county_id)
-			{
-				final ArrayList<Town> mTowns = HouseApi
-						.getCountyTowns(county_id);
-				final String[] ListStr = new String[mTowns.size()];
-				for (int i = 0; i < mTowns.size(); i++)
-				{
-					ListStr[i] = mTowns.get(i).name;
-				}
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						MainActivity.this);
-				builder.setTitle("選擇鄉鎮");
-				builder.setItems(ListStr, new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int position)
-					{
-						AppConstants.currentLatLng = new LatLng(mTowns
-								.get(position).y_lat,
-								mTowns.get(position).x_long);
-						getLocation(false, 1);
-					}
-				});
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-
-		});
-
-		linearFilter.setOnClickListener(new OnClickListener()
-		{
-
-			@Override
-			public void onClick(View v)
-			{
-				EasyTracker easyTracker = EasyTracker
-						.getInstance(MainActivity.this);
-				easyTracker.send(MapBuilder.createEvent("Button",
-						"button_press", "filter_button", null).build());
-				Intent intent = new Intent();
-				intent.setClass(MainActivity.this, FilterNewActivity.class);
-				startActivity(intent);
-			}
-		});
-
+	private void setPopUpInfoWindowListener()
+	{
 		infoBackButton.setOnClickListener(new OnClickListener()
 		{
 
@@ -376,10 +195,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			{
 
 				int aroundSize = 0;
-				if (infoType == 1)
+				if (infoType == AppConstants.TYPE_ID_SALE)
 				{
 					aroundSize = aroundSaleHouses.size();
-				} else if (infoType == 2)
+				} else if (infoType == AppConstants.TYPE_ID_RENT)
 				{
 					aroundSize = aroundRentHouses.size();
 				}
@@ -405,10 +224,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			public void onClick(View v)
 			{
 				int aroundSize = 0;
-				if (infoType == 1)
+				if (infoType == AppConstants.TYPE_ID_SALE)
 				{
 					aroundSize = aroundSaleHouses.size();
-				} else if (infoType == 2)
+				} else if (infoType == AppConstants.TYPE_ID_RENT)
 				{
 					aroundSize = aroundRentHouses.size();
 				}
@@ -433,27 +252,23 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			public void onClick(View v)
 			{
 
-				if (aroudMarkers.get(currentPosition) == null
-						|| aroudMarkers.get(currentPosition).getTitle() == null)
+				if (aroudMarkers.get(currentPosition) == null || aroudMarkers.get(currentPosition).getTitle() == null)
 				{
-					Toast.makeText(MainActivity.this, "marker null",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(MainActivity.this, "marker null", Toast.LENGTH_SHORT).show();
 				} else
 				{
 
 					try
 					{
 
-						String paramsString = aroudMarkers
-								.get(currentPosition).getTitle();
-						
-						Intent intent = new Intent(MainActivity.this,
-								DetailActivity.class);
+						String paramsString = aroudMarkers.get(currentPosition).getTitle();
+
+						Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 						Bundle bundle = new Bundle();
 						bundle.putString("type_num", paramsString);
 						intent.putExtras(bundle);
 						startActivity(intent);
-						
+
 					} catch (Exception e)
 					{
 
@@ -462,7 +277,164 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				}
 			}
 		});
+	}
 
+	private void setBottomButtonsListener()
+	{
+		locationsButtonLayout.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View arg0)
+			{
+				EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button", "button_press", "area locations button", null)
+						.build());
+				showCountyDialog();
+
+			}
+
+			private void showCountyDialog()
+			{
+				final ArrayList<County> mCounties = HouseApi.getCounties();
+				final String[] ListStr = new String[mCounties.size()];
+				for (int i = 0; i < mCounties.size(); i++)
+				{
+					ListStr[i] = mCounties.get(i).name;
+				}
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+				builder.setTitle("選擇地區");
+				builder.setItems(ListStr, new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int position)
+					{
+						showTownDialog(mCounties.get(position).id);
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+
+			private void showTownDialog(int county_id)
+			{
+				final ArrayList<Town> mTowns = HouseApi.getCountyTowns(county_id);
+				final String[] ListStr = new String[mTowns.size()];
+				for (int i = 0; i < mTowns.size(); i++)
+				{
+					ListStr[i] = mTowns.get(i).name;
+				}
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+				builder.setTitle("選擇鄉鎮");
+				builder.setItems(ListStr, new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int position)
+					{
+						AppConstants.currentLatLng = new LatLng(mTowns.get(position).y_lat, mTowns.get(position).x_long);
+						GetLocationAndGetDatas(NOT_RE_GET_LOCATION, ANIMATE_TO_LOCATION);
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+
+		});
+
+		linearFilter.setOnClickListener(new OnClickListener()
+		{
+
+			@Override
+			public void onClick(View v)
+			{
+				EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button", "button_press", "filter_button", null).build());
+				Intent intent = new Intent();
+				intent.setClass(MainActivity.this, FilterNewActivity.class);
+				startActivity(intent);
+			}
+		});
+	}
+
+	private void setSideButtonsListener()
+	{
+		sideFocusButton.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button", "button_press", "focus_button", null).build());
+				GetLocationAndGetDatas(RE_GET_LOCATION, ANIMATE_TO_LOCATION);
+			}
+		});
+
+		sideLayerButton.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+
+				EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+				easyTracker.send(MapBuilder.createEvent("Button", "button_press", "layer_button", null).build());
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+				builder.setTitle("顯示地圖").setSingleChoiceItems(R.array.map_type, currentMapTypePosition,
+						new DialogInterface.OnClickListener()
+						{
+							@Override
+							public void onClick(DialogInterface dialog, int position)
+							{
+								setMapTypeByPosition(position);
+								currentMapTypePosition = position;
+								dialog.cancel();
+							}
+
+							private void setMapTypeByPosition(int position)
+							{
+								switch (position)
+								{
+								case 0:
+									mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+									break;
+								case 1:
+									mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+									break;
+								case 2:
+									mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+									break;
+								default:
+									break;
+								}
+
+							}
+						});
+				builder.show();
+
+			}
+		});
+	}
+
+	private void findViewIDs()
+	{
+		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
+		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
+		titleRentTextView = (TextView) findViewById(R.id.title_rent_text);
+		titleSaleTextView = (TextView) findViewById(R.id.title_sale_text);
+		linearProgressLayout = (LinearLayout) findViewById(R.id.linear_title_progress);
+		locationsButtonLayout = (LinearLayout) findViewById(R.id.linear_location_button);
+		linearFilter = (LinearLayout) findViewById(R.id.linear_filter);
+		mainRentLayout = (LinearLayout) findViewById(R.id.main_rent_layout);
+		linearInfoSwitch = (LinearLayout) findViewById(R.id.linear_info_switch);
+		infoBackButton = (ImageButton) findViewById(R.id.button_info_back);
+		infoForwardbButton = (ImageButton) findViewById(R.id.button_info_forward);
+		infoNumsTextView = (TextView) findViewById(R.id.text_info_nums);
+		linearInfoContent = (LinearLayout) findViewById(R.id.linear_info_contact);
+		titleRentImageView = (ImageView) findViewById(R.id.title_image_rent);
+		titleSaleImageView = (ImageView) findViewById(R.id.title_image_sale);
+		sideFocusButton = (ImageButton) findViewById(R.id.image_btn_focus);
+		sideLayerButton = (ImageButton) findViewById(R.id.image_btn_layers);
 	}
 
 	private void setInfoWindow(int currentPosition, int info_type)
@@ -474,116 +446,84 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
 		ImageView typeImageView = (ImageView) findViewById(R.id.info_type_image);
 
-		if (info_type == 1)
+		if (info_type == AppConstants.TYPE_ID_SALE)
 		{
-			infoNumsTextView.setText(Integer.toString(currentPosition + 1)
-					+ " / " + Integer.toString(aroundSaleHouses.size()));
+			infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
+					+ Integer.toString(aroundSaleHouses.size()));
 
-			imageLoader.DisplayImage(
-					Datas.mSaleHouses.get(currentPosition).promote_pic,
-					imageView);
+			imageLoader.DisplayImage(Datas.mSaleHouses.get(currentPosition).promote_pic, imageView);
 			typeImageView.setImageResource(R.drawable.marker_sale);
 
 			textAddress.setText(aroundSaleHouses.get(currentPosition).address);
 			textTitle.setText(aroundSaleHouses.get(currentPosition).title);
 
 			String moneyString = "<font size=\"3\" color=\"red\">"
-					+ Integer
-							.toString(aroundSaleHouses.get(currentPosition).price)
-					+ "萬"
-					+ "</font>"
-					+ ",&nbsp;"
+					+ Integer.toString(aroundSaleHouses.get(currentPosition).price) + "萬" + "</font>" + ",&nbsp;"
 					+ "<font size=\"3\" color=\"black\">"
-					+ InfoParserApi.parseRentArea(aroundSaleHouses
-							.get(currentPosition).total_area) + "坪" + "</font>";
+					+ InfoParserApi.parseRentArea(aroundSaleHouses.get(currentPosition).total_area) + "坪" + "</font>";
 			textMoney.setText(Html.fromHtml(moneyString));
 
 			String typeString = "<font size=\"3\" color=\"black\">"
-					+ InfoParserApi.parseGroundType(aroundSaleHouses
-							.get(currentPosition).ground_type_id);
+					+ InfoParserApi.parseGroundType(aroundSaleHouses.get(currentPosition).ground_type_id);
 
-			if (InfoParserApi.parseRoomArrangement(
-					aroundSaleHouses.get(currentPosition).rooms, 0,
+			if (InfoParserApi.parseRoomArrangement(aroundSaleHouses.get(currentPosition).rooms, 0,
 					aroundSaleHouses.get(currentPosition).rest_rooms, 0) != "")
 			{
 				typeString = typeString
 						+ ",&nbsp;"
-						+ InfoParserApi
-								.parseRoomArrangement(
-										aroundSaleHouses.get(currentPosition).rooms,
-										0,
-										aroundSaleHouses.get(currentPosition).rest_rooms,
-										0);
+						+ InfoParserApi.parseRoomArrangement(aroundSaleHouses.get(currentPosition).rooms, 0,
+								aroundSaleHouses.get(currentPosition).rest_rooms, 0);
 			}
 
-			if (InfoParserApi.parseLayers(
-					aroundSaleHouses.get(currentPosition).layer,
+			if (InfoParserApi.parseLayers(aroundSaleHouses.get(currentPosition).layer,
 					aroundSaleHouses.get(currentPosition).total_layer) != "")
 			{
 				typeString = typeString
 						+ ",&nbsp;"
-						+ InfoParserApi
-								.parseLayers(
-										aroundSaleHouses.get(currentPosition).layer,
-										aroundSaleHouses.get(currentPosition).total_layer);
+						+ InfoParserApi.parseLayers(aroundSaleHouses.get(currentPosition).layer,
+								aroundSaleHouses.get(currentPosition).total_layer);
 			}
 
 			typeString = typeString + "</font>";
 
 			textRentType.setText(Html.fromHtml(typeString));
 
-		} else if (info_type == 2)
+		} else if (info_type == AppConstants.TYPE_ID_RENT)
 		{
-			infoNumsTextView.setText(Integer.toString(currentPosition + 1)
-					+ " / " + Integer.toString(aroundRentHouses.size()));
+			infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
+					+ Integer.toString(aroundRentHouses.size()));
 
-			imageLoader.DisplayImage(
-					aroundRentHouses.get(currentPosition).promote_pic,
-					imageView);
+			imageLoader.DisplayImage(aroundRentHouses.get(currentPosition).promote_pic, imageView);
 			typeImageView.setImageResource(R.drawable.marker_rent);
 
 			textAddress.setText(aroundRentHouses.get(currentPosition).address);
 			textTitle.setText(aroundRentHouses.get(currentPosition).title);
 
 			String moneyString = "<font size=\"3\" color=\"red\">"
-					+ Integer
-							.toString(aroundRentHouses.get(currentPosition).price)
-					+ "元/月"
-					+ "</font>"
-					+ ",&nbsp;"
+					+ Integer.toString(aroundRentHouses.get(currentPosition).price) + "元/月" + "</font>" + ",&nbsp;"
 					+ "<font size=\"3\" color=\"black\">"
-					+ InfoParserApi.parseRentArea(aroundRentHouses
-							.get(currentPosition).rent_area) + "坪" + "</font>";
+					+ InfoParserApi.parseRentArea(aroundRentHouses.get(currentPosition).rent_area) + "坪" + "</font>";
 			textMoney.setText(Html.fromHtml(moneyString));
 
 			String typeString = "<font size=\"3\" color=\"black\">"
-					+ InfoParserApi.parseRentType(aroundRentHouses
-							.get(currentPosition).rent_type_id);
+					+ InfoParserApi.parseRentType(aroundRentHouses.get(currentPosition).rent_type_id);
 
-			if (InfoParserApi.parseRoomArrangement(
-					aroundRentHouses.get(currentPosition).rooms, 0,
+			if (InfoParserApi.parseRoomArrangement(aroundRentHouses.get(currentPosition).rooms, 0,
 					aroundRentHouses.get(currentPosition).rest_rooms, 0) != "")
 			{
 				typeString = typeString
 						+ ",&nbsp;"
-						+ InfoParserApi
-								.parseRoomArrangement(
-										aroundRentHouses.get(currentPosition).rooms,
-										0,
-										aroundRentHouses.get(currentPosition).rest_rooms,
-										0);
+						+ InfoParserApi.parseRoomArrangement(aroundRentHouses.get(currentPosition).rooms, 0,
+								aroundRentHouses.get(currentPosition).rest_rooms, 0);
 			}
 
-			if (InfoParserApi.parseLayers(
-					aroundRentHouses.get(currentPosition).layer,
+			if (InfoParserApi.parseLayers(aroundRentHouses.get(currentPosition).layer,
 					aroundRentHouses.get(currentPosition).total_layer) != "")
 			{
 				typeString = typeString
 						+ ",&nbsp;"
-						+ InfoParserApi
-								.parseLayers(
-										aroundRentHouses.get(currentPosition).layer,
-										aroundRentHouses.get(currentPosition).total_layer);
+						+ InfoParserApi.parseLayers(aroundRentHouses.get(currentPosition).layer,
+								aroundRentHouses.get(currentPosition).total_layer);
 			}
 
 			typeString = typeString + "</font>";
@@ -596,102 +536,76 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 
-		itemSearch = menu
-				.add(0, ID_SEARCH, 0, "搜索")
-				.setIcon(R.drawable.icon_search_white)
-				.setOnActionExpandListener(
-						new MenuItem.OnActionExpandListener()
+		itemSearch = menu.add(0, ID_SEARCH, 0, "搜索").setIcon(R.drawable.icon_search_white)
+				.setOnActionExpandListener(new MenuItem.OnActionExpandListener()
+				{
+					private EditText search;
+
+					@Override
+					public boolean onMenuItemActionExpand(MenuItem item)
+					{
+						search = (EditText) item.getActionView();
+						search.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+						search.setInputType(InputType.TYPE_CLASS_TEXT);
+						search.requestFocus();
+						search.setOnEditorActionListener(new TextView.OnEditorActionListener()
 						{
-							private EditText search;
-
 							@Override
-							public boolean onMenuItemActionExpand(MenuItem item)
+							public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
 							{
-								search = (EditText) item.getActionView();
-								search.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-								search.setInputType(InputType.TYPE_CLASS_TEXT);
-								search.requestFocus();
-								search.setOnEditorActionListener(new TextView.OnEditorActionListener()
+								if (actionId == EditorInfo.IME_ACTION_SEARCH
+										|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 								{
-									@Override
-									public boolean onEditorAction(TextView v,
-											int actionId, KeyEvent event)
+
+									EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+									easyTracker.send(MapBuilder.createEvent("Button", "button_press", "search_button",
+											null).build());
+
+									String inputString = v.getText().toString();
+									Geocoder geocoder = new Geocoder(MainActivity.this);
+									List<Address> addresses = null;
+									Address address = null;
+									InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+									imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+									try
 									{
-										if (actionId == EditorInfo.IME_ACTION_SEARCH
-												|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-										{
-
-											EasyTracker easyTracker = EasyTracker
-													.getInstance(MainActivity.this);
-											easyTracker.send(MapBuilder
-													.createEvent("Button",
-															"button_press",
-															"search_button",
-															null).build());
-
-											String inputString = v.getText()
-													.toString();
-											Geocoder geocoder = new Geocoder(
-													MainActivity.this);
-											List<Address> addresses = null;
-											Address address = null;
-											InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-											imm.hideSoftInputFromWindow(
-													v.getWindowToken(), 0);
-											try
-											{
-												addresses = geocoder
-														.getFromLocationName(
-																inputString, 1);
-											} catch (Exception e)
-											{
-												Log.e("MainActivity",
-														e.toString());
-											}
-											if (addresses == null
-													|| addresses.isEmpty())
-											{
-												Toast.makeText(
-														MainActivity.this,
-														"無此地點",
-														Toast.LENGTH_SHORT)
-														.show();
-											} else
-											{
-												address = addresses.get(0);
-												double geoLat = address
-														.getLatitude();
-												double geoLong = address
-														.getLongitude();
-												AppConstants.currentLatLng = new LatLng(
-														geoLat, geoLong);
-												getLocation(false, 1);
-											}
-											return true;
-										}
-										return false;
+										addresses = geocoder.getFromLocationName(inputString, 1);
+									} catch (Exception e)
+									{
+										Log.e("MainActivity", e.toString());
 									}
-								});
-								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-								imm.showSoftInput(search,
-										InputMethodManager.SHOW_IMPLICIT);
-								return true;
+									if (addresses == null || addresses.isEmpty())
+									{
+										Toast.makeText(MainActivity.this, "無此地點", Toast.LENGTH_SHORT).show();
+									} else
+									{
+										address = addresses.get(0);
+										double geoLat = address.getLatitude();
+										double geoLong = address.getLongitude();
+										AppConstants.currentLatLng = new LatLng(geoLat, geoLong);
+										GetLocationAndGetDatas(NOT_RE_GET_LOCATION, ANIMATE_TO_LOCATION);
+									}
+									return true;
+								}
+								return false;
 							}
+						});
+						InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.showSoftInput(search, InputMethodManager.SHOW_IMPLICIT);
+						return true;
+					}
 
-							@Override
-							public boolean onMenuItemActionCollapse(
-									MenuItem item)
-							{
+					@Override
+					public boolean onMenuItemActionCollapse(MenuItem item)
+					{
 
-								search.setText("");
-								return true;
-							}
-						}).setActionView(R.layout.collapsible_edittext);
+						search.setText("");
+						return true;
+					}
+				}).setActionView(R.layout.collapsible_edittext);
 
-		itemSearch.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS
-				| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+		itemSearch.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
@@ -700,12 +614,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	{
 		if (mGoogleMap == null)
 		{
-			mGoogleMap = ((TransparentSupportMapFragment) getSupportFragmentManager()
-					.findFragmentById(R.id.map)).getMap();
+			mGoogleMap = ((TransparentSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+					.getMap();
 
-			// mLocationManager = (LocationManager)
-			// getSystemService(LOCATION_SERVICE);
-			// mGoogleMap.setMyLocationEnabled(true);
 			mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
 			mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
 			mGoogleMap.getUiSettings().setCompassEnabled(false);
@@ -714,9 +625,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			if (mGoogleMap == null)
 			{
-				Toast.makeText(getApplicationContext(),
-						"Sorry! unable to create maps", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(getApplicationContext(), "Sorry! unable to create maps", Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -724,27 +633,24 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onLocationChanged(Location arg0)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void onMapClick(LatLng arg0)
 	{
-		// TODO Auto-generated method stub
 		mainRentLayout.setVisibility(View.GONE);
 
 		mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(arg0));
 		AppConstants.currentLatLng = arg0;
 		mGoogleMap.clear();
 		addCurrentLocationMarker();
-		getLocation(false, 1);
+		GetLocationAndGetDatas(NOT_RE_GET_LOCATION, ANIMATE_TO_LOCATION);
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult arg0)
 	{
-		// TODO Auto-generated method stub
 
 	}
 
@@ -756,11 +662,11 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			if (isBackFromFilter)
 			{
-				getLocation(false, 0);
+				GetLocationAndGetDatas(NOT_RE_GET_LOCATION, NOT_ANIMATE_TO_LOCATION);
 				isBackFromFilter = false;
 			} else
 			{
-				getLocation(true, 0);
+				GetLocationAndGetDatas(RE_GET_LOCATION, NOT_ANIMATE_TO_LOCATION);
 			}
 
 			isReSearch = false;
@@ -769,7 +675,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 		if (isBackFromListGetLocationButton)
 		{
-			getLocation(true, 0);
+			GetLocationAndGetDatas(RE_GET_LOCATION, NOT_ANIMATE_TO_LOCATION);
 			isBackFromListGetLocationButton = false;
 		}
 
@@ -778,14 +684,12 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onDisconnected()
 	{
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	protected void onStart()
 	{
-		// TODO Auto-generated method stub
 		super.onStart();
 		EasyTracker.getInstance(this).activityStart(this);
 
@@ -819,28 +723,22 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	public void onStop()
 	{
 		EasyTracker.getInstance(this).activityStop(this);
-		// // If the client is connected
 		if (mLocationClient.isConnected())
 		{
 			stopPeriodicUpdates();
 		}
-		//
-		// // After disconnect() is called, the client is considered "dead".
 		mLocationClient.disconnect();
-
 		super.onStop();
 	}
 
 	private void stopPeriodicUpdates()
 	{
 		mLocationClient.removeLocationUpdates(this);
-		// mConnectionState.setText(R.string.location_updates_stopped);
 	}
 
-	private void getLocation(Boolean isReGetLoc, int aniParam)
+	private void GetLocationAndGetDatas(Boolean isReGetLoc, int aniParam)
 	{
 
-		// If Google Play Services is available
 		if (servicesConnected())
 		{
 			boolean isNeedChangeMap = false;
@@ -850,21 +748,15 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 				try
 				{
-					Location currentLocation = mLocationClient
-							.getLastLocation();
+					Location currentLocation = mLocationClient.getLastLocation();
 					if (currentLocation != null)
 					{
-						AppConstants.currentLatLng = new LatLng(
-								currentLocation.getLatitude(),
+						AppConstants.currentLatLng = new LatLng(currentLocation.getLatitude(),
 								currentLocation.getLongitude());
 					} else
 					{
-
-						AppConstants.currentLatLng = new LatLng(25.0478,
-								121.5172);
-
+						AppConstants.currentLatLng = new LatLng(25.0478, 121.5172);
 					}
-					// add location marker
 					addCurrentLocationMarker();
 				} catch (Exception e)
 				{
@@ -875,289 +767,22 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			if (!isNeedChangeMap)
 			{
-				// center_x = AppConstants.currentLatLng.longitude;
-				// center_y = AppConstants.currentLatLng.latitude;
 
-				mapSize = 15.0f;
-
-				if (0 < AppConstants.km_dis && AppConstants.km_dis <= 0.3)
-				{
-					mapSize = 16.5f;
-				} else if (0.3 < AppConstants.km_dis
-						&& AppConstants.km_dis <= 0.5)
-				{
-					mapSize = 16.0f;
-				} else if (0.5 < AppConstants.km_dis
-						&& AppConstants.km_dis <= 1)
-				{
-					mapSize = 15.0f;
-				} else if (1 < AppConstants.km_dis && AppConstants.km_dis <= 2)
-				{
-					mapSize = 14.0f;
-				} else
-				{
-					mapSize = 13.0f;
-				}
+				mapSize = AppConstants.getMapSizeFromDistance(AppConstants.km_dis);
 
 				if (aniParam == 0)
 				{
-					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-							new LatLng(AppConstants.currentLatLng.latitude,
-									AppConstants.currentLatLng.longitude),
-							mapSize));
+					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
+							AppConstants.currentLatLng.latitude, AppConstants.currentLatLng.longitude), mapSize));
 				} else
 				{
-					CameraPosition cameraPosition = new CameraPosition.Builder()
-							.target(AppConstants.currentLatLng).zoom(mapSize)
-							.build();
-					mGoogleMap.animateCamera(CameraUpdateFactory
-							.newCameraPosition(cameraPosition));
+					CameraPosition cameraPosition = new CameraPosition.Builder().target(AppConstants.currentLatLng)
+							.zoom(mapSize).build();
+					mGoogleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 				}
 			}
 
-			mGoogleMap.setOnMarkerClickListener(new OnMarkerClickListener()
-			{
-
-				@Override
-				public boolean onMarkerClick(Marker marker)
-				{
-					if (marker == null || marker.getTitle() == null)
-					{
-						Toast.makeText(MainActivity.this, "marker null",
-								Toast.LENGTH_SHORT).show();
-						return true;
-					}
-					try
-					{
-
-						String paramsString = marker.getTitle();
-						String positionString = paramsString
-								.substring(paramsString.indexOf("_") + 1);
-						int position = Integer.valueOf(positionString);
-						String type = paramsString.substring(0,
-								paramsString.indexOf("_"));
-
-						mainRentLayout.setVisibility(View.VISIBLE);
-						TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
-						TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
-						TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
-						TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
-						ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
-						ImageView typeImageView = (ImageView) findViewById(R.id.info_type_image);
-
-						if (type.equals("rent"))
-						{
-							infoType = 2;
-							imageLoader.DisplayImage(
-									Datas.mRentHouses.get(position).promote_pic,
-									imageView);
-							typeImageView
-									.setImageResource(R.drawable.marker_rent);
-
-							textAddress.setText(Datas.mRentHouses.get(position).address);
-							textTitle.setText(Datas.mRentHouses.get(position).title);
-
-							String moneyString = "<font size=\"3\" color=\"red\">"
-									+ Integer.toString(Datas.mRentHouses
-											.get(position).price)
-									+ "元/月"
-									+ "</font>"
-									+ ",&nbsp;"
-									+ "<font size=\"3\" color=\"black\">"
-									+ InfoParserApi
-											.parseRentArea(Datas.mRentHouses
-													.get(position).rent_area)
-									+ "坪" + "</font>";
-							textMoney.setText(Html.fromHtml(moneyString));
-
-							String typeString = "<font size=\"3\" color=\"black\">"
-									+ InfoParserApi.parseRentType(Datas.mRentHouses
-											.get(position).rent_type_id);
-
-							if (InfoParserApi.parseRoomArrangement(
-									Datas.mRentHouses.get(position).rooms, 0,
-									Datas.mRentHouses.get(position).rest_rooms,
-									0) != "")
-							{
-								typeString = typeString
-										+ ",&nbsp;"
-										+ InfoParserApi.parseRoomArrangement(
-												Datas.mRentHouses.get(position).rooms,
-												0,
-												Datas.mRentHouses.get(position).rest_rooms,
-												0);
-							}
-
-							if (InfoParserApi.parseLayers(
-									Datas.mRentHouses.get(position).layer,
-									Datas.mRentHouses.get(position).total_layer) != "")
-							{
-								typeString = typeString
-										+ ",&nbsp;"
-										+ InfoParserApi.parseLayers(
-												Datas.mRentHouses.get(position).layer,
-												Datas.mRentHouses.get(position).total_layer);
-							}
-
-							typeString = typeString + "</font>";
-
-							textRentType.setText(Html.fromHtml(typeString));
-
-							setAroundRentHouses(position);
-
-							if (aroundRentHouses.size() > 1)
-							{
-								linearInfoSwitch.setVisibility(View.VISIBLE);
-							} else
-							{
-								linearInfoSwitch.setVisibility(View.GONE);
-							}
-						} else if (type.equals("sale"))
-						{
-							infoType = 1;
-							imageLoader.DisplayImage(
-									Datas.mSaleHouses.get(position).promote_pic,
-									imageView);
-							typeImageView
-									.setImageResource(R.drawable.marker_sale);
-
-							textAddress.setText(Datas.mSaleHouses.get(position).address);
-							textTitle.setText(Datas.mSaleHouses.get(position).title);
-
-							String moneyString = "<font size=\"3\" color=\"red\">"
-									+ Integer.toString(Datas.mSaleHouses
-											.get(position).price)
-									+ "萬"
-									+ "</font>"
-									+ ",&nbsp;"
-									+ "<font size=\"3\" color=\"black\">"
-									+ InfoParserApi
-											.parseRentArea(Datas.mSaleHouses
-													.get(position).total_area)
-									+ "坪" + "</font>";
-							textMoney.setText(Html.fromHtml(moneyString));
-
-							String typeString = "<font size=\"3\" color=\"black\">"
-									+ InfoParserApi.parseGroundType(Datas.mSaleHouses
-											.get(position).ground_type_id);
-
-							if (InfoParserApi.parseRoomArrangement(
-									Datas.mSaleHouses.get(position).rooms, 0,
-									Datas.mSaleHouses.get(position).rest_rooms,
-									0) != "")
-							{
-								typeString = typeString
-										+ ",&nbsp;"
-										+ InfoParserApi.parseRoomArrangement(
-												Datas.mSaleHouses.get(position).rooms,
-												0,
-												Datas.mSaleHouses.get(position).rest_rooms,
-												0);
-							}
-
-							if (InfoParserApi.parseLayers(
-									Datas.mSaleHouses.get(position).layer,
-									Datas.mSaleHouses.get(position).total_layer) != "")
-							{
-								typeString = typeString
-										+ ",&nbsp;"
-										+ InfoParserApi.parseLayers(
-												Datas.mSaleHouses.get(position).layer,
-												Datas.mSaleHouses.get(position).total_layer);
-							}
-
-							typeString = typeString + "</font>";
-
-							textRentType.setText(Html.fromHtml(typeString));
-
-							setAroundSaleHouses(position);
-							if (aroundSaleHouses.size() > 1)
-							{
-								linearInfoSwitch.setVisibility(View.VISIBLE);
-							} else
-							{
-								linearInfoSwitch.setVisibility(View.GONE);
-							}
-						}
-
-					} catch (Exception e)
-					{
-						Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位",
-								Toast.LENGTH_SHORT).show();
-					}
-
-					return true;
-				}
-
-				private void setAroundSaleHouses(int position)
-				{
-					aroundSaleHouses.clear();
-					aroudMarkers.clear();
-					House pickedHouse = Datas.mSaleHouses.get(position);
-					Location pickedLocation = new Location("");
-					pickedLocation.setLatitude(pickedHouse.y_lat);
-					pickedLocation.setLongitude(pickedHouse.x_long);
-
-					for (int i = 0; i < Datas.mSaleHouses.size(); i++)
-					{
-						House item = Datas.mSaleHouses.get(i);
-						Location itemLocation = new Location("");
-						itemLocation.setLatitude(item.y_lat);
-						itemLocation.setLongitude(item.x_long);
-						float dis_meters = itemLocation
-								.distanceTo(pickedLocation);
-						if (dis_meters < 10)
-						{
-							if (item.title.equals(pickedHouse.title))
-							{
-								currentPosition = aroundSaleHouses.size();
-							}
-							aroundSaleHouses.add(item);
-							// i + Datas.mRentHouses.size() because sale maker add after rent
-							aroudMarkers.add(mMarkers.get(i+Datas.mRentHouses.size()));
-						}
-					}
-
-					infoNumsTextView.setText(Integer
-							.toString(currentPosition + 1)
-							+ " / "
-							+ Integer.toString(aroundSaleHouses.size()));
-				}
-
-				private void setAroundRentHouses(int position)
-				{
-					aroundRentHouses.clear();
-					aroudMarkers.clear();
-					RentHouse pickedRentHouse = Datas.mRentHouses.get(position);
-					Location pickedLocation = new Location("");
-					pickedLocation.setLatitude(pickedRentHouse.y_lat);
-					pickedLocation.setLongitude(pickedRentHouse.x_long);
-
-					for (int i = 0; i < Datas.mRentHouses.size(); i++)
-					{
-						RentHouse item = Datas.mRentHouses.get(i);
-						Location itemLocation = new Location("");
-						itemLocation.setLatitude(item.y_lat);
-						itemLocation.setLongitude(item.x_long);
-						float dis_meters = itemLocation
-								.distanceTo(pickedLocation);
-						if (dis_meters < 10)
-						{
-							if (item.title.equals(pickedRentHouse.title))
-							{
-								currentPosition = aroundRentHouses.size();
-							}
-							aroundRentHouses.add(item);
-							aroudMarkers.add(mMarkers.get(i));
-						}
-					}
-
-					infoNumsTextView.setText(Integer
-							.toString(currentPosition + 1)
-							+ " / "
-							+ Integer.toString(aroundRentHouses.size()));
-				}
-			});
+			setMarkerListener();
 
 			mGoogleMap.setOnCameraChangeListener(new OnCameraChangeListener()
 			{
@@ -1165,26 +790,22 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				@Override
 				public void onCameraChange(CameraPosition arg0)
 				{
-					// TODO Auto-generated method stub
 					mainRentLayout.setVisibility(View.GONE);
 				}
 			});
 
-			if (NetworkUtil.getConnectivityStatus(MainActivity.this) == 0)
+			if (NetworkUtil.getConnectivityStatus(MainActivity.this) == NetworkUtil.TYPE_NOT_CONNECTED)
 			{
-				AlertDialog.Builder dialog = new AlertDialog.Builder(
-						MainActivity.this);
+				AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
 				dialog.setTitle("無網路");
 				dialog.setMessage("偵測不到網路");
-				dialog.setPositiveButton("確定",
-						new DialogInterface.OnClickListener()
-						{
-							public void onClick(
-									DialogInterface dialoginterface, int i)
-							{
-								getLocation(true, 0);
-							}
-						});
+				dialog.setPositiveButton("確定", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialoginterface, int i)
+					{
+						GetLocationAndGetDatas(RE_GET_LOCATION, NOT_ANIMATE_TO_LOCATION);
+					}
+				});
 				dialog.show();
 			} else
 			{
@@ -1201,6 +822,210 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		}
 	}
 
+	private void setMarkerListener()
+	{
+		mGoogleMap.setOnMarkerClickListener(new OnMarkerClickListener()
+		{
+
+			@Override
+			public boolean onMarkerClick(Marker marker)
+			{
+				if (marker == null || marker.getTitle() == null)
+				{
+					Toast.makeText(MainActivity.this, "marker null", Toast.LENGTH_SHORT).show();
+					return true;
+				}
+				try
+				{
+
+					String paramsString = marker.getTitle();
+					String positionString = paramsString.substring(paramsString.indexOf("_") + 1);
+					int position = Integer.valueOf(positionString);
+					String type = paramsString.substring(0, paramsString.indexOf("_"));
+
+					mainRentLayout.setVisibility(View.VISIBLE);
+					TextView textTitle = (TextView) findViewById(R.id.rent_list_title);
+					TextView textAddress = (TextView) findViewById(R.id.rent_list_address_text);
+					TextView textMoney = (TextView) findViewById(R.id.rent_list_money_text);
+					TextView textRentType = (TextView) findViewById(R.id.rent_list_type_text);
+					ImageView imageView = (ImageView) findViewById(R.id.rent_list_image);
+					ImageView typeImageView = (ImageView) findViewById(R.id.info_type_image);
+
+					if (type.equals("rent"))
+					{
+						infoType = AppConstants.TYPE_ID_RENT;
+						imageLoader.DisplayImage(Datas.mRentHouses.get(position).promote_pic, imageView);
+						typeImageView.setImageResource(R.drawable.marker_rent);
+
+						textAddress.setText(Datas.mRentHouses.get(position).address);
+						textTitle.setText(Datas.mRentHouses.get(position).title);
+
+						String moneyString = "<font size=\"3\" color=\"red\">"
+								+ Integer.toString(Datas.mRentHouses.get(position).price) + "元/月" + "</font>"
+								+ ",&nbsp;" + "<font size=\"3\" color=\"black\">"
+								+ InfoParserApi.parseRentArea(Datas.mRentHouses.get(position).rent_area) + "坪"
+								+ "</font>";
+						textMoney.setText(Html.fromHtml(moneyString));
+
+						String typeString = "<font size=\"3\" color=\"black\">"
+								+ InfoParserApi.parseRentType(Datas.mRentHouses.get(position).rent_type_id);
+
+						if (InfoParserApi.parseRoomArrangement(Datas.mRentHouses.get(position).rooms, 0,
+								Datas.mRentHouses.get(position).rest_rooms, 0) != "")
+						{
+							typeString = typeString
+									+ ",&nbsp;"
+									+ InfoParserApi.parseRoomArrangement(Datas.mRentHouses.get(position).rooms, 0,
+											Datas.mRentHouses.get(position).rest_rooms, 0);
+						}
+
+						if (InfoParserApi.parseLayers(Datas.mRentHouses.get(position).layer,
+								Datas.mRentHouses.get(position).total_layer) != "")
+						{
+							typeString = typeString
+									+ ",&nbsp;"
+									+ InfoParserApi.parseLayers(Datas.mRentHouses.get(position).layer,
+											Datas.mRentHouses.get(position).total_layer);
+						}
+
+						typeString = typeString + "</font>";
+
+						textRentType.setText(Html.fromHtml(typeString));
+
+						setAroundRentHouses(position);
+
+						if (aroundRentHouses.size() > 1)
+						{
+							linearInfoSwitch.setVisibility(View.VISIBLE);
+						} else
+						{
+							linearInfoSwitch.setVisibility(View.GONE);
+						}
+					} else if (type.equals("sale"))
+					{
+						infoType = AppConstants.TYPE_ID_SALE;
+						imageLoader.DisplayImage(Datas.mSaleHouses.get(position).promote_pic, imageView);
+						typeImageView.setImageResource(R.drawable.marker_sale);
+
+						textAddress.setText(Datas.mSaleHouses.get(position).address);
+						textTitle.setText(Datas.mSaleHouses.get(position).title);
+
+						String moneyString = "<font size=\"3\" color=\"red\">"
+								+ Integer.toString(Datas.mSaleHouses.get(position).price) + "萬" + "</font>" + ",&nbsp;"
+								+ "<font size=\"3\" color=\"black\">"
+								+ InfoParserApi.parseRentArea(Datas.mSaleHouses.get(position).total_area) + "坪"
+								+ "</font>";
+						textMoney.setText(Html.fromHtml(moneyString));
+
+						String typeString = "<font size=\"3\" color=\"black\">"
+								+ InfoParserApi.parseGroundType(Datas.mSaleHouses.get(position).ground_type_id);
+
+						if (InfoParserApi.parseRoomArrangement(Datas.mSaleHouses.get(position).rooms, 0,
+								Datas.mSaleHouses.get(position).rest_rooms, 0) != "")
+						{
+							typeString = typeString
+									+ ",&nbsp;"
+									+ InfoParserApi.parseRoomArrangement(Datas.mSaleHouses.get(position).rooms, 0,
+											Datas.mSaleHouses.get(position).rest_rooms, 0);
+						}
+
+						if (InfoParserApi.parseLayers(Datas.mSaleHouses.get(position).layer,
+								Datas.mSaleHouses.get(position).total_layer) != "")
+						{
+							typeString = typeString
+									+ ",&nbsp;"
+									+ InfoParserApi.parseLayers(Datas.mSaleHouses.get(position).layer,
+											Datas.mSaleHouses.get(position).total_layer);
+						}
+
+						typeString = typeString + "</font>";
+
+						textRentType.setText(Html.fromHtml(typeString));
+
+						setAroundSaleHouses(position);
+						if (aroundSaleHouses.size() > 1)
+						{
+							linearInfoSwitch.setVisibility(View.VISIBLE);
+						} else
+						{
+							linearInfoSwitch.setVisibility(View.GONE);
+						}
+					}
+
+				} catch (Exception e)
+				{
+					Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位", Toast.LENGTH_SHORT).show();
+				}
+
+				return true;
+			}
+
+			private void setAroundSaleHouses(int position)
+			{
+				aroundSaleHouses.clear();
+				aroudMarkers.clear();
+				House pickedHouse = Datas.mSaleHouses.get(position);
+				Location pickedLocation = new Location("");
+				pickedLocation.setLatitude(pickedHouse.y_lat);
+				pickedLocation.setLongitude(pickedHouse.x_long);
+
+				for (int i = 0; i < Datas.mSaleHouses.size(); i++)
+				{
+					House item = Datas.mSaleHouses.get(i);
+					Location itemLocation = new Location("");
+					itemLocation.setLatitude(item.y_lat);
+					itemLocation.setLongitude(item.x_long);
+					float dis_meters = itemLocation.distanceTo(pickedLocation);
+					if (dis_meters < 10)
+					{
+						if (item.title.equals(pickedHouse.title))
+						{
+							currentPosition = aroundSaleHouses.size();
+						}
+						aroundSaleHouses.add(item);
+						// i + Datas.mRentHouses.size() because sale maker add
+						// after rent
+						aroudMarkers.add(mMarkers.get(i + Datas.mRentHouses.size()));
+					}
+				}
+
+				infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
+						+ Integer.toString(aroundSaleHouses.size()));
+			}
+
+			private void setAroundRentHouses(int position)
+			{
+				aroundRentHouses.clear();
+				aroudMarkers.clear();
+				RentHouse pickedRentHouse = Datas.mRentHouses.get(position);
+				Location pickedLocation = new Location("");
+				pickedLocation.setLatitude(pickedRentHouse.y_lat);
+				pickedLocation.setLongitude(pickedRentHouse.x_long);
+
+				for (int i = 0; i < Datas.mRentHouses.size(); i++)
+				{
+					RentHouse item = Datas.mRentHouses.get(i);
+					Location itemLocation = new Location("");
+					itemLocation.setLatitude(item.y_lat);
+					itemLocation.setLongitude(item.x_long);
+					float dis_meters = itemLocation.distanceTo(pickedLocation);
+					if (dis_meters < 10)
+					{
+						if (item.title.equals(pickedRentHouse.title))
+						{
+							currentPosition = aroundRentHouses.size();
+						}
+						aroundRentHouses.add(item);
+						aroudMarkers.add(mMarkers.get(i));
+					}
+				}
+
+				infoNumsTextView.setText(Integer.toString(currentPosition + 1) + " / "
+						+ Integer.toString(aroundRentHouses.size()));
+			}
+		});
+	}
+
 	protected class GetRentHouseTask extends AsyncTask<Void, Integer, Integer>
 	{
 
@@ -1208,7 +1033,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		protected void onPreExecute()
 		{
 			super.onPreExecute();
-			// linearTitleLayout.setVisibility(View.VISIBLE);
 			showProgress();
 		}
 
@@ -1216,91 +1040,75 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		protected Integer doInBackground(Void... Void)
 		{
 
-			// HouseApi.getAroundAmenities("111", 25.05535, 121.4588);
-
 			try
 			{
 				Datas.mRentHouses.clear();
 				Datas.mSaleHouses.clear();
 			} catch (Exception e)
 			{
-				// TODO: handle exception
+
 			}
 
-			Boolean is_rent_show = Setting.getBooleanSetting(
-					Setting.KeyIsShowRent, MainActivity.this);
+			Boolean is_rent_show = Setting.getBooleanSetting(Setting.KeyIsShowRent, MainActivity.this);
 
-			Boolean is_sale_show = Setting.getBooleanSetting(
-					Setting.KeyIsShowSale, MainActivity.this);
+			Boolean is_sale_show = Setting.getBooleanSetting(Setting.KeyIsShowSale, MainActivity.this);
 
-			String rpMinString = Setting.getSetting(
-					Setting.keyRentHousePriceMin, MainActivity.this);
+			String rpMinString = Setting.getSetting(Setting.keyRentHousePriceMin, MainActivity.this);
 			if (rpMinString.equals("0"))
 			{
 				rpMinString = null;
 			}
-			String rpMaxString = Setting.getSetting(
-					Setting.keyRentHousePriceMax, MainActivity.this);
+			String rpMaxString = Setting.getSetting(Setting.keyRentHousePriceMax, MainActivity.this);
 			if (rpMaxString.equals("0"))
 			{
 				rpMaxString = null;
 			}
-			String hp_min = Setting.getSetting(Setting.keyHousePriceMin,
-					MainActivity.this);
+			String hp_min = Setting.getSetting(Setting.keyHousePriceMin, MainActivity.this);
 			if (hp_min.equals("0"))
 			{
 				hp_min = null;
 			}
-			String hp_max = Setting.getSetting(Setting.keyHousePriceMax,
-					MainActivity.this);
+			String hp_max = Setting.getSetting(Setting.keyHousePriceMax, MainActivity.this);
 			if (hp_max.equals("0"))
 			{
 				hp_max = null;
 			}
-			String areaMinString = Setting.getSetting(Setting.keyAreaMin,
-					MainActivity.this);
+			String areaMinString = Setting.getSetting(Setting.keyAreaMin, MainActivity.this);
 			if (areaMinString.equals("0"))
 			{
 				areaMinString = null;
 			}
-			String areaMaxString = Setting.getSetting(Setting.keyAreaMax,
-					MainActivity.this);
+			String areaMaxString = Setting.getSetting(Setting.keyAreaMax, MainActivity.this);
 			if (areaMaxString.equals("0"))
 			{
 				areaMaxString = null;
 			}
-			String age_min = Setting.getSetting(Setting.keyAgeMin,
-					MainActivity.this);
+			String age_min = Setting.getSetting(Setting.keyAgeMin, MainActivity.this);
 			if (age_min.equals("0"))
 			{
 				age_min = null;
 			}
-			String age_max = Setting.getSetting(Setting.keyAgeMax,
-					MainActivity.this);
+			String age_max = Setting.getSetting(Setting.keyAgeMax, MainActivity.this);
 			if (age_max.equals("0"))
 			{
 				age_max = null;
 			}
 
-			String rentTypeString = Setting.getSetting(Setting.keyRentType,
-					MainActivity.this);
+			String rentTypeString = Setting.getSetting(Setting.keyRentType, MainActivity.this);
 			if (rentTypeString.equals("0"))
 			{
 				rentTypeString = null;
 			}
-			String saleTypeString = Setting.getSetting(
-					Setting.keySaleType, MainActivity.this);
+			String saleTypeString = Setting.getSetting(Setting.keySaleType, MainActivity.this);
 			if (saleTypeString.equals("0"))
 			{
 				saleTypeString = null;
 			}
 
-			Boolean isGetData = HouseApi2.getAroundRentsAndHouses(is_rent_show,
-					is_sale_show, AppConstants.km_dis,
-					AppConstants.currentLatLng.longitude,
-					AppConstants.currentLatLng.latitude, rpMinString,
-					rpMaxString, hp_min, hp_max, areaMinString, areaMaxString,
-					age_min, age_max, rentTypeString, saleTypeString);
+			Boolean isGetData = HouseApi2.getAroundRentsAndHouses(is_rent_show, is_sale_show, AppConstants.km_dis,
+					AppConstants.currentLatLng.longitude, AppConstants.currentLatLng.latitude, rpMinString,
+					rpMaxString, hp_min, hp_max, areaMinString, areaMaxString, age_min, age_max, rentTypeString,
+					saleTypeString);
 			if (isGetData)
 			{
 				return 1;
@@ -1315,11 +1123,9 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		protected void onPostExecute(Integer isDataGet)
 		{
 			endProgress();
-			Boolean is_rent_show = Setting.getBooleanSetting(
-					Setting.KeyIsShowRent, MainActivity.this);
+			Boolean is_rent_show = Setting.getBooleanSetting(Setting.KeyIsShowRent, MainActivity.this);
 
-			Boolean is_sale_show = Setting.getBooleanSetting(
-					Setting.KeyIsShowSale, MainActivity.this);
+			Boolean is_sale_show = Setting.getBooleanSetting(Setting.KeyIsShowSale, MainActivity.this);
 
 			if (isDataGet == 1)
 			{
@@ -1328,8 +1134,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				{
 					titleRentImageView.setVisibility(View.VISIBLE);
 					titleRentTextView.setVisibility(View.VISIBLE);
-					titleRentTextView.setText("出租 x "
-							+ Integer.toString(Datas.mRentHouses.size()));
+					titleRentTextView.setText("出租 x " + Integer.toString(Datas.mRentHouses.size()));
 				} else
 				{
 					titleRentImageView.setVisibility(View.GONE);
@@ -1340,8 +1145,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 				{
 					titleSaleImageView.setVisibility(View.VISIBLE);
 					titleSaleTextView.setVisibility(View.VISIBLE);
-					titleSaleTextView.setText("出售 x "
-							+ Integer.toString(Datas.mSaleHouses.size()));
+					titleSaleTextView.setText("出售 x " + Integer.toString(Datas.mSaleHouses.size()));
 				} else
 				{
 					titleSaleImageView.setVisibility(View.GONE);
@@ -1353,8 +1157,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			{
 				new addMarkerTask().execute();
 
-				Toast.makeText(MainActivity.this, "無資料~", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(MainActivity.this, "無資料~", Toast.LENGTH_SHORT).show();
 				if (is_rent_show)
 				{
 					titleRentImageView.setVisibility(View.VISIBLE);
@@ -1389,17 +1192,14 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		@Override
 		protected void onPreExecute()
 		{
-			// TODO Auto-generated method stub
 			super.onPreExecute();
 			mGoogleMap.clear();
 			addCurrentLocationMarker();
-			// setTitleText(mPage);
 		}
 
 		@Override
 		protected Void doInBackground(Void... arg0)
 		{
-			// TODO Auto-generated method stub
 			setMapMark();
 			return null;
 		}
@@ -1407,8 +1207,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		@Override
 		protected void onPostExecute(Void result)
 		{
-			// Toast.makeText(MainActivity.this, Integer.toString(crawlDateNum),
-			// Toast.LENGTH_SHORT).show();
 
 			for (int i = 0; i < mMarkers.size(); i++)
 			{
@@ -1439,35 +1237,27 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			for (int i = 0; i < Datas.mRentHouses.size(); i++)
 			{
-				LatLng newLatLng = new LatLng(Datas.mRentHouses.get(i).y_lat,
-						Datas.mRentHouses.get(i).x_long);
+				LatLng newLatLng = new LatLng(Datas.mRentHouses.get(i).y_lat, Datas.mRentHouses.get(i).x_long);
 
 				View layout = inflater.inflate(R.layout.item_marker, null);
-				layout.setLayoutParams(new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.WRAP_CONTENT,
+				layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 						LinearLayout.LayoutParams.WRAP_CONTENT));
-				ImageView markerView = (ImageView) layout
-						.findViewById(R.id.image_marker);
-				TextView markerText = (TextView) layout
-						.findViewById(R.id.text_marker_price);
-				TextView markerTypeText = (TextView) layout
-						.findViewById(R.id.text_rent_type);
+				ImageView markerView = (ImageView) layout.findViewById(R.id.image_marker);
+				TextView markerText = (TextView) layout.findViewById(R.id.text_marker_price);
+				TextView markerTypeText = (TextView) layout.findViewById(R.id.text_rent_type);
 
-				String rentType = InfoParserApi.parseRentType(Datas.mRentHouses
-						.get(i).rent_type_id);
+				String rentType = InfoParserApi.parseRentType(Datas.mRentHouses.get(i).rent_type_id);
 				rentType = rentType.substring(0, 1);
 				markerTypeText.setText(rentType);
 
 				// for later marker info window use
-				MarkerOptions marker = new MarkerOptions().position(newLatLng)
-						.title("rent_" + Integer.toString(i));
+				MarkerOptions marker = new MarkerOptions().position(newLatLng).title("rent_" + Integer.toString(i));
 
 				double rentPrice = ((double) Datas.mRentHouses.get(i).price) / 1000;
 				String rentPriceString = Double.toString(rentPrice);
 				if (rentPriceString.indexOf(".0") != -1)
 				{
-					rentPriceString = rentPriceString.substring(0,
-							rentPriceString.indexOf(".0"));
+					rentPriceString = rentPriceString.substring(0, rentPriceString.indexOf(".0"));
 				}
 				markerText.setText(rentPriceString + "k");
 
@@ -1475,7 +1265,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 				Bitmap bm = loadBitmapFromView(layout);
 
-				// Changing marker icon
 				marker.icon(BitmapDescriptorFactory.fromBitmap(bm));
 
 				mMarkers.add(marker);
@@ -1483,35 +1272,26 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 			for (int i = 0; i < Datas.mSaleHouses.size(); i++)
 			{
-				LatLng newLatLng = new LatLng(Datas.mSaleHouses.get(i).y_lat,
-						Datas.mSaleHouses.get(i).x_long);
+				LatLng newLatLng = new LatLng(Datas.mSaleHouses.get(i).y_lat, Datas.mSaleHouses.get(i).x_long);
 
 				View layout = inflater.inflate(R.layout.item_marker, null);
-				layout.setLayoutParams(new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.WRAP_CONTENT,
+				layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
 						LinearLayout.LayoutParams.WRAP_CONTENT));
-				ImageView markerView = (ImageView) layout
-						.findViewById(R.id.image_marker);
-				TextView markerText = (TextView) layout
-						.findViewById(R.id.text_marker_price);
-				TextView markerTypeText = (TextView) layout
-						.findViewById(R.id.text_rent_type);
+				ImageView markerView = (ImageView) layout.findViewById(R.id.image_marker);
+				TextView markerText = (TextView) layout.findViewById(R.id.text_marker_price);
+				TextView markerTypeText = (TextView) layout.findViewById(R.id.text_rent_type);
 
-				String groundType = InfoParserApi
-						.parseGroundType(Datas.mSaleHouses.get(i).ground_type_id);
+				String groundType = InfoParserApi.parseGroundType(Datas.mSaleHouses.get(i).ground_type_id);
 				groundType = groundType.substring(0, 1);
 				markerTypeText.setText(groundType);
 
-				// for later marker info window use
-				MarkerOptions marker = new MarkerOptions().position(newLatLng)
-						.title("sale_" + Integer.toString(i));
+				MarkerOptions marker = new MarkerOptions().position(newLatLng).title("sale_" + Integer.toString(i));
 
 				double rentPrice = ((double) Datas.mSaleHouses.get(i).price);
 				String rentPriceString = Double.toString(rentPrice);
 				if (rentPriceString.indexOf(".0") != -1)
 				{
-					rentPriceString = rentPriceString.substring(0,
-							rentPriceString.indexOf(".0"));
+					rentPriceString = rentPriceString.substring(0, rentPriceString.indexOf(".0"));
 				}
 				markerText.setText(rentPriceString + "萬");
 
@@ -1519,7 +1299,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 				Bitmap bm = loadBitmapFromView(layout);
 
-				// Changing marker icon
 				marker.icon(BitmapDescriptorFactory.fromBitmap(bm));
 
 				mMarkers.add(marker);
@@ -1527,8 +1306,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 		} catch (Exception e)
 		{
-			Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(MainActivity.this, "系統錯誤,請點擊地圖重新定位", Toast.LENGTH_SHORT).show();
 		}
 
 	}
@@ -1538,16 +1316,14 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		if (v.getMeasuredHeight() <= 0)
 		{
 			v.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(),
-					v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+			Bitmap b = Bitmap.createBitmap(v.getMeasuredWidth(), v.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 			Canvas c = new Canvas(b);
 			v.layout(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
 			v.draw(c);
 			return b;
 		}
 
-		Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width,
-				v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+		Bitmap b = Bitmap.createBitmap(v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
 		Canvas c = new Canvas(b);
 		v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
 		v.draw(c);
@@ -1557,7 +1333,6 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public void onBackPressed()
 	{
-		// TODO Auto-generated method stub
 
 		if (mainRentLayout.getVisibility() == View.VISIBLE)
 		{
@@ -1566,37 +1341,27 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		{
 			super.onBackPressed();
 			isReSearch = true;
-			// finish();
 		}
 	}
 
 	private boolean servicesConnected()
 	{
 
-		// Check that Google Play services is available
-		int resultCode = GooglePlayServicesUtil
-				.isGooglePlayServicesAvailable(this);
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
-		// If Google Play services is available
 		if (ConnectionResult.SUCCESS == resultCode)
 		{
-			// In debug mode, log the status
 			Log.d(LocationUtils.APPTAG, "Google Play Service Available");
-
-			// Continue
 			return true;
 			// Google Play services was not available for some reason
 		} else
 		{
-			// Display an error dialog
-			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode,
-					this, 0);
-			if (dialog != null)
+			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
+			if (errorDialog != null)
 			{
 				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-				errorFragment.setDialog(dialog);
-				errorFragment.show(getSupportFragmentManager(),
-						LocationUtils.APPTAG);
+				errorFragment.setDialog(errorDialog);
+				errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
 			}
 			return false;
 		}
@@ -1608,21 +1373,12 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		// Global field to contain the error dialog
 		private Dialog mDialog;
 
-		/**
-		 * Default constructor. Sets the dialog field to null
-		 */
 		public ErrorDialogFragment()
 		{
 			super();
 			mDialog = null;
 		}
 
-		/**
-		 * Set the dialog to display
-		 * 
-		 * @param dialog
-		 *            An error dialog
-		 */
 		public void setDialog(Dialog dialog)
 		{
 			mDialog = dialog;
@@ -1640,17 +1396,31 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 
 	private void addCurrentLocationMarker()
 	{
-		// TODO Auto-generated method stub
 		mGoogleMap.clear();
-		loacationMarker = new MarkerOptions().position(
-				AppConstants.currentLatLng).draggable(true);
-		loacationMarker.icon(BitmapDescriptorFactory
-				.fromResource(R.drawable.pin_red));
+		loacationMarker = new MarkerOptions().position(AppConstants.currentLatLng).draggable(true);
+		loacationMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.pin_red));
 		mGoogleMap.addMarker(loacationMarker);
 	}
 
 	private void setDrawerLayout()
 	{
+
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open,
+				R.string.drawer_close)
+		{
+			public void onDrawerClosed(View view)
+			{
+				supportInvalidateOptionsMenu();
+			}
+
+			public void onDrawerOpened(View drawerView)
+			{
+				supportInvalidateOptionsMenu();
+			}
+		};
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		items.add(new SectionItem("房屋搜尋"));
 		items.add(new EntryItem("位置附近", R.drawable.icon_access_location));
@@ -1667,56 +1437,44 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 		mDrawerListView.setAdapter(mDrawerAdapter);
 		mDrawerListView.setOnItemClickListener((new OnItemClickListener()
 		{
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id)
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				if (!items.get(position).isSection())
 				{
-					// EntryItem item = (EntryItem) items.get(position);
 
 					switch (position)
 					{
 					case 1:
-						EasyTracker easyTracker = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker.send(MapBuilder.createEvent("Button",
-								"button_press", "focus_button2", null).build());
-						getLocation(true, 1);
+						EasyTracker easyTracker = EasyTracker.getInstance(MainActivity.this);
+						easyTracker.send(MapBuilder.createEvent("Button", "button_press", "focus_button2", null)
+								.build());
+						GetLocationAndGetDatas(RE_GET_LOCATION, ANIMATE_TO_LOCATION);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 2:
-						EasyTracker easyTracker2 = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker2
-								.send(MapBuilder.createEvent("Button",
-										"button_press", "filter_button2", null)
-										.build());
+						EasyTracker easyTracker2 = EasyTracker.getInstance(MainActivity.this);
+						easyTracker2.send(MapBuilder.createEvent("Button", "button_press", "filter_button2", null)
+								.build());
 						Intent intent = new Intent();
 						intent.setClass(MainActivity.this, FilterNewActivity.class);
 						startActivity(intent);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 3:
-						EasyTracker easyTrackerF = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTrackerF.send(MapBuilder.createEvent("Button",
-								"button_press", "Favorite_button", null)
+						EasyTracker easyTrackerF = EasyTracker.getInstance(MainActivity.this);
+						easyTrackerF.send(MapBuilder.createEvent("Button", "button_press", "Favorite_button", null)
 								.build());
 						Intent intentFavorite = new Intent();
-						intentFavorite.setClass(MainActivity.this,
-								FavoriteActivity.class);
+						intentFavorite.setClass(MainActivity.this, FavoriteActivity.class);
 						startActivity(intentFavorite);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 5:
-						EasyTracker easyTracker3 = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker3.send(MapBuilder.createEvent("Button",
-								"button_press", "calculator_button", null)
+						EasyTracker easyTracker3 = EasyTracker.getInstance(MainActivity.this);
+						easyTracker3.send(MapBuilder.createEvent("Button", "button_press", "calculator_button", null)
 								.build());
 
-						Intent intent2 = new Intent(MainActivity.this,
-								CalculatorActivity.class);
+						Intent intent2 = new Intent(MainActivity.this, CalculatorActivity.class);
 						startActivity(intent2);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
@@ -1727,31 +1485,25 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 								"找屋高手 https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						startActivity(Intent.createChooser(intent3, "Share..."));
 
-						EasyTracker easyTracker4 = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker4.send(MapBuilder.createEvent("Button",
-								"button_press", "share_button", null).build());
+						EasyTracker easyTracker4 = EasyTracker.getInstance(MainActivity.this);
+						easyTracker4.send(MapBuilder.createEvent("Button", "button_press", "share_button", null)
+								.build());
 						break;
 					case 8:
-						EasyTracker easyTracker5 = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker5.send(MapBuilder.createEvent("Button",
-								"button_press", "star_button", null).build());
+						EasyTracker easyTracker5 = EasyTracker.getInstance(MainActivity.this);
+						easyTracker5
+								.send(MapBuilder.createEvent("Button", "button_press", "star_button", null).build());
 
-						Uri uri = Uri
-								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
+						Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						Intent it = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(it);
 						break;
 					case 9:
-						// about us
-						EasyTracker easyTracker6 = EasyTracker
-								.getInstance(MainActivity.this);
-						easyTracker6.send(MapBuilder.createEvent("Button",
-								"button_press", "about_button", null).build());
+						EasyTracker easyTracker6 = EasyTracker.getInstance(MainActivity.this);
+						easyTracker6.send(MapBuilder.createEvent("Button", "button_press", "about_button", null)
+								.build());
 
-						Intent intent5 = new Intent(MainActivity.this,
-								AboutUsActivity.class);
+						Intent intent5 = new Intent(MainActivity.this, AboutUsActivity.class);
 						startActivity(intent5);
 						break;
 					default:
@@ -1766,8 +1518,7 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud
-				.getMenuItem(item)))
+		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud.getMenuItem(item)))
 		{
 			return true;
 		} else
@@ -1775,15 +1526,10 @@ public class MainActivity extends FragmentActivity implements LocationListener,
 			switch (item.getItemId())
 			{
 			case ID_SEARCH:
-				// Toast.makeText(MainActivity.this, "search",
-				// Toast.LENGTH_SHORT).show();
 				break;
 			case R.id.menu_list:
-				// Toast.makeText(MainActivity.this, "list",
-				// Toast.LENGTH_SHORT).show();
 				Intent intent = new Intent();
 				intent.setClass(MainActivity.this, ListActivity.class);
-				// intent.putExtras(bundle);
 				startActivity(intent);
 				break;
 			}

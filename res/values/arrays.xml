@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="list_sort">
+    <string-array name="list_sort_rent">
         <item>租金(低->高)</item>
         <item>租金(高->低)</item>
         <item>坪數(低->高)</item>
         <item>坪數(高->低)</item>    
     </string-array>
+    <string-array name="list_sort_sale">
+        <item>總價(低->高)</item>
+        <item>總價(高->低)</item>
+        <item>坪數(低->高)</item>
+        <item>坪數(高->低)</item>    
+    </string-array>   
     <string-array name="map_type">
         <item>正常</item>
         <item>衛星</item>

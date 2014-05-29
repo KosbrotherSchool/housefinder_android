@@ -35,4 +35,26 @@ public class AppConstants
 	{
 		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
 	}
+
+	public static float getMapSizeFromDistance(double km_dis)
+	{
+		float mapSize = 15.0f;
+		if (0 < km_dis && km_dis <= 0.3)
+		{
+			mapSize = 16.5f;
+		} else if (0.3 < km_dis && km_dis <= 0.5)
+		{
+			mapSize = 16.0f;
+		} else if (0.5 < km_dis && km_dis <= 1)
+		{
+			mapSize = 15.0f;
+		} else if (1 < km_dis && km_dis <= 2)
+		{
+			mapSize = 14.0f;
+		} else
+		{
+			mapSize = 13.0f;
+		}
+		return mapSize;
+	}
 }

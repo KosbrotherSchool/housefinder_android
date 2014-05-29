@@ -47,12 +47,13 @@ import com.kosbrother.houseprice.fragment.RentListFragment;
 import com.kosbrother.houseprice.fragment.SaleListFragment;
 
 @SuppressLint("NewApi")
-public class ListActivity extends FragmentActivity implements TabListener,
-		OnPageChangeListener
+public class ListActivity extends FragmentActivity implements TabListener, OnPageChangeListener
 {
 
-	private ActionBarDrawerToggle mDrawerToggle;
+	private final int Pager_Position_Sale = 0;
+	private final int Pager_Position_Rent = 1;
 
+	private ActionBarDrawerToggle mDrawerToggle;
 	private DrawerLayout mDrawerLayout;
 	private ArrayList<Item> items = new ArrayList<Item>();
 	private ListView mDrawerListView;
@@ -79,10 +80,8 @@ public class ListActivity extends FragmentActivity implements TabListener,
 		mActionBar.setDisplayShowTitleEnabled(false);
 		mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		mActionBar.addTab(mActionBar.newTab().setText("出售")
-				.setTabListener(this));
-		mActionBar.addTab(mActionBar.newTab().setText("出租")
-				.setTabListener(this));
+		mActionBar.addTab(mActionBar.newTab().setText("出售").setTabListener(this));
+		mActionBar.addTab(mActionBar.newTab().setText("出租").setTabListener(this));
 		forceTabs();
 
 		mAdapter = new MyAdapter(getSupportFragmentManager());
@@ -101,16 +100,14 @@ public class ListActivity extends FragmentActivity implements TabListener,
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerListView = (ListView) findViewById(R.id.left_list_view);
 
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
-				GravityCompat.START);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		leftDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 
 		// enable ActionBar app icon to behave as action to toggle nav drawer
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
 
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-				R.drawable.ic_drawer, R.string.drawer_open,
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open,
 				R.string.drawer_close)
 		{
 			public void onDrawerClosed(View view)
@@ -193,8 +190,8 @@ public class ListActivity extends FragmentActivity implements TabListener,
 		try
 		{
 			final ActionBar actionBar = getActionBar();
-			final Method setHasEmbeddedTabsMethod = actionBar.getClass()
-					.getDeclaredMethod("setHasEmbeddedTabs", boolean.class);
+			final Method setHasEmbeddedTabsMethod = actionBar.getClass().getDeclaredMethod("setHasEmbeddedTabs",
+					boolean.class);
 			setHasEmbeddedTabsMethod.setAccessible(true);
 			setHasEmbeddedTabsMethod.invoke(actionBar, true);
 		} catch (final Exception e)
@@ -222,8 +219,7 @@ public class ListActivity extends FragmentActivity implements TabListener,
 		mDrawerListView.setAdapter(mDrawerAdapter);
 		mDrawerListView.setOnItemClickListener((new OnItemClickListener()
 		{
-			public void onItemClick(AdapterView<?> parent, View v,
-					int position, long id)
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				if (!items.get(position).isSection())
 				{
@@ -232,52 +228,41 @@ public class ListActivity extends FragmentActivity implements TabListener,
 					switch (position)
 					{
 					case 1:
-						EasyTracker easyTracker = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker.send(MapBuilder.createEvent("Button",
-								"button_press", "focus_button2", null).build());
+						EasyTracker easyTracker = EasyTracker.getInstance(ListActivity.this);
+						easyTracker.send(MapBuilder.createEvent("Button", "button_press", "focus_button2", null)
+								.build());
 						finish();
 						MainActivity.isBackFromListGetLocationButton = true;
 						break;
 					case 2:
-						EasyTracker easyTracker2 = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker2
-								.send(MapBuilder.createEvent("Button",
-										"button_press", "filter_button2", null)
-										.build());
+						EasyTracker easyTracker2 = EasyTracker.getInstance(ListActivity.this);
+						easyTracker2.send(MapBuilder.createEvent("Button", "button_press", "filter_button2", null)
+								.build());
 						finish();
 						MainActivity.isBackFromListFilterButton = true;
 						break;
 					case 3:
-						EasyTracker easyTrackerF = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTrackerF.send(MapBuilder.createEvent("Button",
-								"button_press", "Favorite_button", null)
+						EasyTracker easyTrackerF = EasyTracker.getInstance(ListActivity.this);
+						easyTrackerF.send(MapBuilder.createEvent("Button", "button_press", "Favorite_button", null)
 								.build());
 						Intent intentFavorite = new Intent();
-						intentFavorite.setClass(ListActivity.this,
-								FavoriteActivity.class);
+						intentFavorite.setClass(ListActivity.this, FavoriteActivity.class);
 						startActivity(intentFavorite);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 5:
-						EasyTracker easyTracker3 = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker3.send(MapBuilder.createEvent("Button",
-								"button_press", "calculator_button", null)
+						EasyTracker easyTracker3 = EasyTracker.getInstance(ListActivity.this);
+						easyTracker3.send(MapBuilder.createEvent("Button", "button_press", "calculator_button", null)
 								.build());
 
-						Intent intent2 = new Intent(ListActivity.this,
-								CalculatorActivity.class);
+						Intent intent2 = new Intent(ListActivity.this, CalculatorActivity.class);
 						startActivity(intent2);
 						mDrawerLayout.closeDrawer(leftDrawer);
 						break;
 					case 7:
-						EasyTracker easyTracker4 = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker4.send(MapBuilder.createEvent("Button",
-								"button_press", "share_button", null).build());
+						EasyTracker easyTracker4 = EasyTracker.getInstance(ListActivity.this);
+						easyTracker4.send(MapBuilder.createEvent("Button", "button_press", "share_button", null)
+								.build());
 
 						Intent intent3 = new Intent(Intent.ACTION_SEND);
 						intent3.setType("text/plain");
@@ -286,25 +271,21 @@ public class ListActivity extends FragmentActivity implements TabListener,
 						startActivity(Intent.createChooser(intent3, "Share..."));
 						break;
 					case 8:
-						EasyTracker easyTracker5 = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker5.send(MapBuilder.createEvent("Button",
-								"button_press", "star_button", null).build());
+						EasyTracker easyTracker5 = EasyTracker.getInstance(ListActivity.this);
+						easyTracker5
+								.send(MapBuilder.createEvent("Button", "button_press", "star_button", null).build());
 
-						Uri uri = Uri
-								.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
+						Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.kosbrother.housefinder");
 						Intent it = new Intent(Intent.ACTION_VIEW, uri);
 						startActivity(it);
 						break;
 					case 9:
 						// about us
-						EasyTracker easyTracker6 = EasyTracker
-								.getInstance(ListActivity.this);
-						easyTracker6.send(MapBuilder.createEvent("Button",
-								"button_press", "about_button", null).build());
+						EasyTracker easyTracker6 = EasyTracker.getInstance(ListActivity.this);
+						easyTracker6.send(MapBuilder.createEvent("Button", "button_press", "about_button", null)
+								.build());
 
-						Intent intent5 = new Intent(ListActivity.this,
-								AboutUsActivity.class);
+						Intent intent5 = new Intent(ListActivity.this, AboutUsActivity.class);
 						startActivity(intent5);
 						break;
 					default:
@@ -340,8 +321,7 @@ public class ListActivity extends FragmentActivity implements TabListener,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud
-				.getMenuItem(item)))
+		if (mDrawerToggle.onOptionsItemSelected(DrawerMenuItemMethoud.getMenuItem(item)))
 		{
 			return true;
 		} else
@@ -355,16 +335,20 @@ public class ListActivity extends FragmentActivity implements TabListener,
 				break;
 			case R.id.menu_sorting:
 
-				AlertDialog.Builder builder = new AlertDialog.Builder(
-						ListActivity.this);
-				// Set the dialog title
-				builder.setTitle("排序").setSingleChoiceItems(R.array.list_sort,
-						currentSortPosition,
+				AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
+				int sortArrayID = 0;
+				if (mPager.getCurrentItem() == Pager_Position_Sale)
+				{
+					sortArrayID = R.array.list_sort_sale;
+				} else
+				{
+					sortArrayID = R.array.list_sort_rent;
+				}
+				builder.setTitle("排序").setSingleChoiceItems(sortArrayID, currentSortPosition,
 						new DialogInterface.OnClickListener()
 						{
 							@Override
-							public void onClick(DialogInterface dialog,
-									int position)
+							public void onClick(DialogInterface dialog, int position)
 							{
 								sortingByPosition(position);
 								currentSortPosition = position;
@@ -384,23 +368,61 @@ public class ListActivity extends FragmentActivity implements TabListener,
 		switch (position)
 		{
 		case 0:
-			Collections.sort(Datas.mRentHouses,
-					new Datas.RentPriceComparator(0));
+			if (mPager.getCurrentItem() == Pager_Position_Sale)
+			{
+				Collections.sort(Datas.mSaleHouses, new Datas.SaleTotalPriceComparator(0));
+			} else if (mPager.getCurrentItem() == Pager_Position_Rent)
+			{
+				Collections.sort(Datas.mRentHouses, new Datas.RentPriceComparator(0));
+			}
+			notifyFragmentListDataChangedByPagerPosition(mPager.getCurrentItem());
 			break;
 		case 1:
-			Collections.sort(Datas.mRentHouses,
-					new Datas.RentPriceComparator(1));
+			if (mPager.getCurrentItem() == Pager_Position_Sale)
+			{
+				Collections.sort(Datas.mSaleHouses, new Datas.SaleTotalPriceComparator(1));
+			} else if (mPager.getCurrentItem() == Pager_Position_Rent)
+			{
+				Collections.sort(Datas.mRentHouses, new Datas.RentPriceComparator(1));
+			}
+			notifyFragmentListDataChangedByPagerPosition(mPager.getCurrentItem());
 			break;
 		case 2:
-			Collections
-					.sort(Datas.mRentHouses, new Datas.RentAreaComparator(0));
+			if (mPager.getCurrentItem() == Pager_Position_Sale)
+			{
+				Collections.sort(Datas.mSaleHouses, new Datas.SaleAreaComparator(0));
+			} else if (mPager.getCurrentItem() == Pager_Position_Rent)
+			{
+				Collections.sort(Datas.mRentHouses, new Datas.RentAreaComparator(0));
+			}
+			notifyFragmentListDataChangedByPagerPosition(mPager.getCurrentItem());
 			break;
 		case 3:
-			Collections
-					.sort(Datas.mRentHouses, new Datas.RentAreaComparator(1));
+			if (mPager.getCurrentItem() == Pager_Position_Sale)
+			{
+				Collections.sort(Datas.mSaleHouses, new Datas.SaleAreaComparator(1));
+			} else if (mPager.getCurrentItem() == Pager_Position_Rent)
+			{
+				Collections.sort(Datas.mRentHouses, new Datas.RentAreaComparator(1));
+			}
+			notifyFragmentListDataChangedByPagerPosition(mPager.getCurrentItem());
 			break;
 		}
-		// mAdapter.notifyDataSetChanged();
+	}
+
+	private void notifyFragmentListDataChangedByPagerPosition(int pagerPosition)
+	{
+		if (pagerPosition == Pager_Position_Sale)
+		{
+			SaleListFragment saleListFragment = (SaleListFragment) getSupportFragmentManager().getFragments().get(
+					pagerPosition);
+			saleListFragment.nofifyListDataChanged();
+		} else if (pagerPosition == Pager_Position_Rent)
+		{
+			RentListFragment saleListFragment = (RentListFragment) getSupportFragmentManager().getFragments().get(
+					pagerPosition);
+			saleListFragment.nofifyListDataChanged();
+		}
 	}
 
 	@Override
@@ -429,8 +451,7 @@ public class ListActivity extends FragmentActivity implements TabListener,
 
 	private void CallAds()
 	{
-		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar,
-				ListActivity.this);
+		boolean isGivenStar = Setting.getBooleanSetting(Setting.KeyGiveStar, ListActivity.this);
 
 		if (!isGivenStar)
 		{

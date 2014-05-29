@@ -16,6 +16,7 @@ import com.kosbrother.houseprice.adapter.ListSaleHouseAdapter;
 public class SaleListFragment extends Fragment
 {
 	private static ListActivity mActivity;
+	private ListSaleHouseAdapter mAdapter;
 
 	public static SaleListFragment newInstance(ListActivity theListActivity)
 	{
@@ -31,24 +32,26 @@ public class SaleListFragment extends Fragment
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View v = inflater.inflate(R.layout.fragment_list, container, false);
 		ListView mListView = (ListView) v.findViewById(R.id.list_houses);
-		LinearLayout mNoDataLayout = (LinearLayout) v
-				.findViewById(R.id.fragment_no_data_layout);
+		LinearLayout mNoDataLayout = (LinearLayout) v.findViewById(R.id.fragment_no_data_layout);
 
 		if (Datas.mSaleHouses.size() == 0)
 		{
 			mNoDataLayout.setVisibility(View.VISIBLE);
 		} else
 		{
-			ListSaleHouseAdapter mAdapter = new ListSaleHouseAdapter(mActivity,
-					Datas.mSaleHouses);
+			mAdapter = new ListSaleHouseAdapter(mActivity, Datas.mSaleHouses);
 			mListView.setAdapter(mAdapter);
 		}
 
 		return v;
+	}
+
+	public void nofifyListDataChanged()
+	{
+		mAdapter.notifyDataSetChanged();
 	}
 }
