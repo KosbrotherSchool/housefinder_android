@@ -52,8 +52,7 @@ public class SaleDetailFragment extends Fragment
 	 * Create a new instance of CountingFragment, providing "num" as an
 	 * argument.
 	 */
-	public static SaleDetailFragment newInstance(int num,
-			DetailActivity theDetailActivity)
+	public static SaleDetailFragment newInstance(int num, DetailActivity theDetailActivity)
 	{
 		SaleDetailFragment f = new SaleDetailFragment();
 
@@ -122,27 +121,21 @@ public class SaleDetailFragment extends Fragment
 	private ImageButton contactCallButton;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState)
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View v = inflater.inflate(R.layout.fragment_detail_pager, container,
-				false);
+		View v = inflater.inflate(R.layout.fragment_detail_pager, container, false);
 
 		myScrollView = (ScrollView) v.findViewById(R.id.detail_scroll_view);
 		mapImageView = (ImageView) v.findViewById(R.id.detail_map_image);
 
-		imageViewPager = (ViewPager) v
-				.findViewById(R.id.detail_image_view_pager);
+		imageViewPager = (ViewPager) v.findViewById(R.id.detail_image_view_pager);
 		mIndicator = (CirclePageIndicator) v.findViewById(R.id.indicator);
 		final float density = getResources().getDisplayMetrics().density;
 		// mIndicator.setBackgroundColor(0xFFCCCCCC);
 		mIndicator.setRadius(4 * density);
-		mIndicator.setPageColor(getActivity().getResources().getColor(
-				R.color.circle_gray));
-		mIndicator.setFillColor(getActivity().getResources().getColor(
-				R.color.light_black));
-		mIndicator.setStrokeColor(getActivity().getResources().getColor(
-				R.color.white));
+		mIndicator.setPageColor(getActivity().getResources().getColor(R.color.circle_gray));
+		mIndicator.setFillColor(getActivity().getResources().getColor(R.color.light_black));
+		mIndicator.setStrokeColor(getActivity().getResources().getColor(R.color.white));
 		mIndicator.setStrokeWidth(1 * density);
 
 		typeImageView = (ImageView) v.findViewById(R.id.detail_type_image);
@@ -160,23 +153,16 @@ public class SaleDetailFragment extends Fragment
 		parkingTextView = (TextView) v.findViewById(R.id.detail_parking_text);
 		featureTextView = (TextView) v.findViewById(R.id.detail_feature_text);
 		otherTextView = (TextView) v.findViewById(R.id.detail_other_text);
-		furnitureTextView = (TextView) v
-				.findViewById(R.id.detail_furniture_text);
-		equipmenTextView = (TextView) v
-				.findViewById(R.id.detail_equipment_text);
+		furnitureTextView = (TextView) v.findViewById(R.id.detail_furniture_text);
+		equipmenTextView = (TextView) v.findViewById(R.id.detail_equipment_text);
 		livingTextView = (TextView) v.findViewById(R.id.detail_living_text);
-		communicationTextView = (TextView) v
-				.findViewById(R.id.detail_cummunication_text);
+		communicationTextView = (TextView) v.findViewById(R.id.detail_cummunication_text);
 
-		linearDirect = (LinearLayout) v
-				.findViewById(R.id.linear_location_direct);
-		linearAmenities = (LinearLayout) v
-				.findViewById(R.id.linear_location_amenities);
-		linearStreetView = (LinearLayout) v
-				.findViewById(R.id.linear_location_streetview);
+		linearDirect = (LinearLayout) v.findViewById(R.id.linear_location_direct);
+		linearAmenities = (LinearLayout) v.findViewById(R.id.linear_location_amenities);
+		linearStreetView = (LinearLayout) v.findViewById(R.id.linear_location_streetview);
 		linearContact = (LinearLayout) v.findViewById(R.id.linear_contact);
-		linearAddFavorite = (LinearLayout) v
-				.findViewById(R.id.linear_add_favorite);
+		linearAddFavorite = (LinearLayout) v.findViewById(R.id.linear_add_favorite);
 
 		contactImageView = (ImageView) v.findViewById(R.id.contact_image);
 		contactNameTextView = (TextView) v.findViewById(R.id.contact_name);
@@ -184,26 +170,22 @@ public class SaleDetailFragment extends Fragment
 		contactCallButton = (ImageButton) v.findViewById(R.id.call_imagebutton);
 
 		DisplayMetrics displaymetrics = new DisplayMetrics();
-		getActivity().getWindowManager().getDefaultDisplay()
-				.getMetrics(displaymetrics);
+		getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 		int height = displaymetrics.heightPixels;
 		int width = displaymetrics.widthPixels;
 
 		// set image
 		String x_long = Double.toString(theSaleHouse.x_long);
 		String y_lat = Double.toString(theSaleHouse.y_lat);
-		String url = "http://maps.google.com/maps/api/staticmap?center="
-				+ y_lat + "," + x_long
-				+ "&zoom=17&markers=color:red%7Clabel:%7C" + y_lat + ","
-				+ x_long + "&size=" + Integer.toString(width / 2) + "x"
-				+ Integer.toString(height / 2 / 6)
+		String url = "http://maps.google.com/maps/api/staticmap?center=" + y_lat + "," + x_long
+				+ "&zoom=17&markers=color:red%7Clabel:%7C" + y_lat + "," + x_long + "&size="
+				+ Integer.toString(width / 2) + "x" + Integer.toString(height / 2 / 6)
 				+ "&language=zh-TW&scale=2&sensor=false";
 
 		// mapImageView.setAdjustViewBounds(true);
 		imageLoader.DisplayImage(url, mapImageView, width);
 
-		detailAddFavoriteTextView = (TextView) v
-				.findViewById(R.id.detail_add_favorite_text);
+		detailAddFavoriteTextView = (TextView) v.findViewById(R.id.detail_add_favorite_text);
 		if (getIsAddFavorite(theSaleHouse.house_id))
 		{
 			detailAddFavoriteTextView.setText("從最愛刪除");
@@ -246,25 +228,21 @@ public class SaleDetailFragment extends Fragment
 			titleTextView.setText(theSaleHouse.title);
 			addressTextView.setText(theSaleHouse.address);
 
-			String moneyString = "<font size=\"3\" color=\"red\">"
-					+ Integer.toString(theSaleHouse.price) + "萬" + "</font>"
-					+ ",&nbsp;" + "<font size=\"3\" color=\"black\">" + "屋齡"
+			String moneyString = "<font size=\"3\" color=\"red\">" + Integer.toString(theSaleHouse.price) + "萬"
+					+ "</font>" + ",&nbsp;" + "<font size=\"3\" color=\"black\">" +"&nbsp;"+Double.toString(theSaleHouse.square_price)+"萬/坪"+ ",&nbsp;屋齡"
 					+ Integer.toString(theSaleHouse.building_age) + "年</font>";
 			moneyTextView.setText(Html.fromHtml(moneyString));
 
 			String buildingString = "~";
 			if (theSaleHouse.building_type_id != 0)
 			{
-				buildingString = InfoParserApi
-						.parseBuildingType(theSaleHouse.building_type_id);
+				buildingString = InfoParserApi.parseBuildingType(theSaleHouse.building_type_id);
 			}
 			typeTextView.setText("型態: " + buildingString);
 
-			depositTextView.setText(InfoParserApi
-					.parseGroundType(theSaleHouse.ground_type_id));
+			depositTextView.setText(InfoParserApi.parseGroundType(theSaleHouse.ground_type_id));
 
-			String layerString = InfoParserApi.parseLayers(theSaleHouse.layer,
-					theSaleHouse.total_layer);
+			String layerString = InfoParserApi.parseLayers(theSaleHouse.layer, theSaleHouse.total_layer);
 			if (!layerString.equals(""))
 			{
 				layerTextView.setText("樓層: " + layerString);
@@ -273,8 +251,7 @@ public class SaleDetailFragment extends Fragment
 				layerTextView.setText("樓層: " + "~");
 			}
 
-			String arrangeString = InfoParserApi.parseRoomArrangement(
-					theSaleHouse.rooms, theSaleHouse.living_rooms,
+			String arrangeString = InfoParserApi.parseRoomArrangement(theSaleHouse.rooms, theSaleHouse.living_rooms,
 					theSaleHouse.rest_rooms, theSaleHouse.balconies);
 
 			if (!arrangeString.equals(""))
@@ -285,8 +262,7 @@ public class SaleDetailFragment extends Fragment
 				arrangeTextView.setText("~");
 			}
 
-			areaTextView.setText("坪數 "
-					+ Double.toString(theSaleHouse.total_area) + "坪");
+			areaTextView.setText("坪數 " + Double.toString(theSaleHouse.total_area) + "坪");
 
 			parkingTextView.setText("車位: " + theSaleHouse.parkingString);
 
@@ -295,36 +271,29 @@ public class SaleDetailFragment extends Fragment
 			String otherString = "";
 			if (theSaleHouse.guard_price != 0)
 			{
-				otherString = "*管理費: "
-						+ Integer.toString(theSaleHouse.guard_price) + "\n";
+				otherString = "*管理費: " + Integer.toString(theSaleHouse.guard_price) + "\n";
 			}
 			if (theSaleHouse.is_renting)
 			{
 				otherString = otherString + "*是否出租中: 是" + "\n";
 			}
-			if (!theSaleHouse.orientation.equals("")
-					&& !theSaleHouse.orientation.equals("null"))
+			if (!theSaleHouse.orientation.equals("") && !theSaleHouse.orientation.equals("null"))
 			{
-				otherString = otherString + "*房子座向:" + theSaleHouse.orientation
-						+ "\n";
+				otherString = otherString + "*房子座向:" + theSaleHouse.orientation + "\n";
 			}
 			otherTextView.setText(otherString);
 
-			if (!theSaleHouse.ground_explanation.equals("")
-					&& !theSaleHouse.ground_explanation.equals("null"))
+			if (!theSaleHouse.ground_explanation.equals("") && !theSaleHouse.ground_explanation.equals("null"))
 			{
-				furnitureTextView.setText("提供傢俱: "
-						+ theSaleHouse.ground_explanation);
+				furnitureTextView.setText("提供傢俱: " + theSaleHouse.ground_explanation);
 			} else
 			{
 				furnitureTextView.setVisibility(View.GONE);
 			}
 
-			if (!theSaleHouse.living_explanation.equals("")
-					&& !theSaleHouse.living_explanation.equals("null"))
+			if (!theSaleHouse.living_explanation.equals("") && !theSaleHouse.living_explanation.equals("null"))
 			{
-				livingTextView.setText("生活機能: "
-						+ theSaleHouse.living_explanation);
+				livingTextView.setText("生活機能: " + theSaleHouse.living_explanation);
 			} else
 			{
 				livingTextView.setVisibility(View.GONE);
@@ -345,11 +314,9 @@ public class SaleDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					Intent intent = new Intent(
-							android.content.Intent.ACTION_VIEW, Uri
-									.parse("http://maps.google.com/maps?daddr="
-											+ theSaleHouse.y_lat + ","
-											+ theSaleHouse.x_long));
+					Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri
+							.parse("http://maps.google.com/maps?daddr=" + theSaleHouse.y_lat + ","
+									+ theSaleHouse.x_long));
 					startActivity(intent);
 
 				}
@@ -361,8 +328,7 @@ public class SaleDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					Intent intent = new Intent(getActivity(),
-							AmenitiesActivity.class);
+					Intent intent = new Intent(getActivity(), AmenitiesActivity.class);
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theSaleHouse.x_long);
 					bundle.putDouble("house_y", theSaleHouse.y_lat);
@@ -380,21 +346,15 @@ public class SaleDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					Intent streetView = new Intent(
-							android.content.Intent.ACTION_VIEW, Uri
-									.parse("google.streetview:cbll="
-											+ theSaleHouse.y_lat + ","
-											+ theSaleHouse.x_long
-											+ "&cbp=1,99.56,,1,-5.27&mz=21"));
+					Intent streetView = new Intent(android.content.Intent.ACTION_VIEW, Uri
+							.parse("google.streetview:cbll=" + theSaleHouse.y_lat + "," + theSaleHouse.x_long
+									+ "&cbp=1,99.56,,1,-5.27&mz=21"));
 					startActivity(streetView);
 				}
 			});
 
 			contactNameTextView.setText("聯絡人: " + theSaleHouse.vender_name);
-			contactPhoneTextView
-					.setText("Phone: "
-							+ InfoParserApi
-									.parsePhoneNumber(theSaleHouse.phone_number));
+			contactPhoneTextView.setText("Phone: " + InfoParserApi.parsePhoneNumber(theSaleHouse.phone_number));
 
 			if (theSaleHouse.vender_name.indexOf("小姐") != -1)
 			{
@@ -410,19 +370,15 @@ public class SaleDetailFragment extends Fragment
 
 					if (AppConstants.isTablet(getActivity()))
 					{
-						Toast.makeText(getActivity(), "此裝置無電話",
-								Toast.LENGTH_SHORT).show();
+						Toast.makeText(getActivity(), "此裝置無電話", Toast.LENGTH_SHORT).show();
 					} else
 					{
 
-						if (theSaleHouse.phone_number != null
-								&& !theSaleHouse.phone_number.equals("")
+						if (theSaleHouse.phone_number != null && !theSaleHouse.phone_number.equals("")
 								&& !theSaleHouse.phone_number.equals("null"))
 						{
-							EasyTracker easyTracker = EasyTracker
-									.getInstance(getActivity());
-							easyTracker.send(MapBuilder.createEvent("Button",
-									"button_press", "call_button", null)
+							EasyTracker easyTracker = EasyTracker.getInstance(getActivity());
+							easyTracker.send(MapBuilder.createEvent("Button", "button_press", "call_button", null)
 									.build());
 							// Intent intent = new Intent(Intent.ACTION_CALL,
 							// Uri
@@ -433,8 +389,7 @@ public class SaleDetailFragment extends Fragment
 							startActivity(intent);
 						} else
 						{
-							Toast.makeText(getActivity(), "無電話",
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getActivity(), "無電話", Toast.LENGTH_SHORT).show();
 						}
 					}
 				}
@@ -446,8 +401,7 @@ public class SaleDetailFragment extends Fragment
 				@Override
 				public void onClick(View v)
 				{
-					Intent intent = new Intent(getActivity(),
-							AmenitiesActivity.class);
+					Intent intent = new Intent(getActivity(), AmenitiesActivity.class);
 					Bundle bundle = new Bundle();
 					bundle.putDouble("house_x", theSaleHouse.x_long);
 					bundle.putDouble("house_y", theSaleHouse.y_lat);
@@ -479,8 +433,7 @@ public class SaleDetailFragment extends Fragment
 
 					try
 					{
-						Dao<OrmHouse, Integer> saleHouseDao = mActivity
-								.getHelper().getOrmHouseDao();
+						Dao<OrmHouse, Integer> saleHouseDao = mActivity.getHelper().getOrmHouseDao();
 
 						if (!getIsAddFavorite(theSaleHouse.house_id))
 						{
@@ -501,29 +454,23 @@ public class SaleDetailFragment extends Fragment
 							newSaleHouse.ground_type_id = theSaleHouse.ground_type_id;
 							newSaleHouse.house_type_id = AppConstants.TYPE_ID_SALE;
 							saleHouseDao.create(newSaleHouse);
-							Toast.makeText(getActivity(), "已加入最愛!",
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(getActivity(), "已加入最愛!", Toast.LENGTH_SHORT).show();
 
 							detailAddFavoriteTextView.setText("已加入最愛");
 
 						} else
 						{
 
-							DeleteBuilder<OrmHouse, Integer> deleteBuilder = saleHouseDao
-									.deleteBuilder();
-							deleteBuilder.where().eq(
-									OrmHouse.Column_House_ID_NAME,
-									theSaleHouse.house_id);
+							DeleteBuilder<OrmHouse, Integer> deleteBuilder = saleHouseDao.deleteBuilder();
+							deleteBuilder.where().eq(OrmHouse.Column_House_ID_NAME, theSaleHouse.house_id);
 							deleteBuilder.delete();
-							Toast.makeText(mActivity, "從我的最愛移除!",
-									Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "從我的最愛移除!", Toast.LENGTH_SHORT).show();
 							detailAddFavoriteTextView.setText("加入最愛");
 						}
 
 					} catch (Exception e)
 					{
-						Toast.makeText(mActivity, "執行失敗!", Toast.LENGTH_SHORT)
-								.show();
+						Toast.makeText(mActivity, "執行失敗!", Toast.LENGTH_SHORT).show();
 					}
 
 				}
@@ -538,10 +485,8 @@ public class SaleDetailFragment extends Fragment
 		Boolean isBoolean = false;
 		try
 		{
-			Dao<OrmHouse, Integer> saleHouseDao = mActivity.getHelper()
-					.getOrmHouseDao();
-			QueryBuilder<OrmHouse, Integer> queryBuilder = saleHouseDao
-					.queryBuilder();
+			Dao<OrmHouse, Integer> saleHouseDao = mActivity.getHelper().getOrmHouseDao();
+			QueryBuilder<OrmHouse, Integer> queryBuilder = saleHouseDao.queryBuilder();
 			queryBuilder.where().eq(OrmHouse.Column_House_ID_NAME, house_id);
 			List<OrmHouse> list = queryBuilder.query();
 			if (list.size() > 0)
@@ -593,8 +538,7 @@ public class SaleDetailFragment extends Fragment
 			ImageView imageView = new ImageView(getActivity());
 			if (theSaleHouse.picArrayList.size() != 0)
 			{
-				imageLoader.DisplayImage(
-						theSaleHouse.picArrayList.get(position), imageView);
+				imageLoader.DisplayImage(theSaleHouse.picArrayList.get(position), imageView);
 				// imageView.setImageResource(IMAGES[position]);
 
 			} else

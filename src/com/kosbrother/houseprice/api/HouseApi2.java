@@ -25,9 +25,7 @@ public class HouseApi2
 
 	public static House getHouseDetails(int house_id)
 	{
-		String message = getMessageFromServer("GET",
-				"/api/v2/house/get_sale_detail?house_id=" + house_id, null,
-				null);
+		String message = getMessageFromServer("GET", "/api/v2/house/get_sale_detail?house_id=" + house_id, null, null);
 		if (message == null)
 		{
 			return null;
@@ -59,8 +57,7 @@ public class HouseApi2
 			String promote_pic = "";
 			try
 			{
-				promote_pic = jArray.getJSONObject(0).getString(
-						"promote_pic_link");
+				promote_pic = jArray.getJSONObject(0).getString("promote_pic_link");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -87,8 +84,7 @@ public class HouseApi2
 			double square_price = 0;
 			try
 			{
-				square_price = jArray.getJSONObject(0)
-						.getDouble("square_price");
+				square_price = jArray.getJSONObject(0).getDouble("square_price");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -115,7 +111,7 @@ public class HouseApi2
 			int total_layer = 0;
 			try
 			{
-				total_layer = jArray.getJSONObject(0).getInt("total_layers");
+				total_layer = jArray.getJSONObject(0).getInt("total_lyaers");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -169,8 +165,7 @@ public class HouseApi2
 			String parkingString = "";
 			try
 			{
-				parkingString = jArray.getJSONObject(0).getString(
-						"parking_type");
+				parkingString = jArray.getJSONObject(0).getString("parking_type");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -209,8 +204,7 @@ public class HouseApi2
 			String ground_explanation = "";
 			try
 			{
-				ground_explanation = jArray.getJSONObject(0).getString(
-						"ground_explanation");
+				ground_explanation = jArray.getJSONObject(0).getString("ground_explanation");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -219,8 +213,7 @@ public class HouseApi2
 			String living_explanation = "";
 			try
 			{
-				living_explanation = jArray.getJSONObject(0).getString(
-						"living_explanation");
+				living_explanation = jArray.getJSONObject(0).getString("living_explanation");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -229,8 +222,7 @@ public class HouseApi2
 			String feature_html = "";
 			try
 			{
-				feature_html = jArray.getJSONObject(0)
-						.getString("feature_html");
+				feature_html = jArray.getJSONObject(0).getString("feature_html");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -248,8 +240,7 @@ public class HouseApi2
 			String phone_number = "";
 			try
 			{
-				phone_number = jArray.getJSONObject(0)
-						.getString("phone_number");
+				phone_number = jArray.getJSONObject(0).getString("phone_number");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -261,8 +252,7 @@ public class HouseApi2
 			int building_type_id = 0;
 			try
 			{
-				building_type_id = jArray.getJSONObject(0).getInt(
-						"building_type_id");
+				building_type_id = jArray.getJSONObject(0).getInt("building_type_id");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -271,8 +261,7 @@ public class HouseApi2
 			int ground_type_id = 0;
 			try
 			{
-				ground_type_id = jArray.getJSONObject(0).getInt(
-						"ground_type_id");
+				ground_type_id = jArray.getJSONObject(0).getInt("ground_type_id");
 			} catch (Exception e)
 			{
 				// TODO: handle exception
@@ -287,19 +276,15 @@ public class HouseApi2
 				// TODO: handle exception
 			}
 
-			House newHouse = new House(house_id, title, promote_pic, price,
-					address, square_price, total_area, layer, total_layer,
-					building_age, rooms, living_rooms, rest_rooms, balconies,
-					parkingString, x_long, y_lat, guard_price, orientation,
-					is_renting, ground_explanation, living_explanation,
-					feature_html, vender_name, phone_number, county_id,
-					town_id, ground_type_id, building_type_id, is_show);
+			House newHouse = new House(house_id, title, promote_pic, price, address, square_price, total_area, layer,
+					total_layer, building_age, rooms, living_rooms, rest_rooms, balconies, parkingString, x_long,
+					y_lat, guard_price, orientation, is_renting, ground_explanation, living_explanation, feature_html,
+					vender_name, phone_number, county_id, town_id, ground_type_id, building_type_id, is_show);
 
 			JSONArray jArrayPics = jArray.getJSONArray(1);
 			for (int i = 0; i < jArrayPics.length(); i++)
 			{
-				String picLink = jArrayPics.getJSONObject(i).getString(
-						"picture_link");
+				String picLink = jArrayPics.getJSONObject(i).getString("picture_link");
 				newHouse.picArrayList.add(picLink);
 			}
 
@@ -310,11 +295,10 @@ public class HouseApi2
 		}
 	}
 
-	public static boolean getAroundRentsAndHouses(Boolean is_rent_show,
-			Boolean is_sale_show, double km_dis, double center_x,
-			double center_y, String rp_min, String rp_max, String hp_min,
-			String hp_max, String area_min, String area_max, String age_min,
-			String age_max, String rentTypeString, String saleTypeString)
+	public static boolean getAroundRentsAndHouses(Boolean is_rent_show, Boolean is_sale_show, double km_dis,
+			double center_x, double center_y, String rp_min, String rp_max, String hp_min, String hp_max,
+			String area_min, String area_max, String age_min, String age_max, String rentTypeString,
+			String saleTypeString)
 	{
 		int int_rent = 0;
 		if (is_rent_show)
@@ -328,10 +312,9 @@ public class HouseApi2
 			int_sale = 1;
 		}
 
-		String query_link = "/api/v2/house/get_houses_by_distance?"
-				+ "is_show_rent=" + Integer.toString(int_rent)
-				+ "&is_show_sale=" + Integer.toString(int_sale) + "&km_dis="
-				+ km_dis + "&center_x=" + center_x + "&center_y=" + center_y;
+		String query_link = "/api/v2/house/get_houses_by_distance?" + "is_show_rent=" + Integer.toString(int_rent)
+				+ "&is_show_sale=" + Integer.toString(int_sale) + "&km_dis=" + km_dis + "&center_x=" + center_x
+				+ "&center_y=" + center_y;
 
 		if (rp_min != null)
 		{
@@ -430,8 +413,7 @@ public class HouseApi2
 				String promote_pic = "";
 				try
 				{
-					promote_pic = jRentsArray.getJSONObject(i).getString(
-							"promote_pic_link");
+					promote_pic = jRentsArray.getJSONObject(i).getString("promote_pic_link");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -459,8 +441,7 @@ public class HouseApi2
 				double rent_area = 0;
 				try
 				{
-					rent_area = jRentsArray.getJSONObject(i).getDouble(
-							"rent_area");
+					rent_area = jRentsArray.getJSONObject(i).getDouble("rent_area");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -478,8 +459,7 @@ public class HouseApi2
 				int total_layer = 0;
 				try
 				{
-					total_layer = jRentsArray.getJSONObject(i).getInt(
-							"total_lyaers");
+					total_layer = jRentsArray.getJSONObject(i).getInt("total_lyaers");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -497,8 +477,7 @@ public class HouseApi2
 				int rest_rooms = 0;
 				try
 				{
-					rest_rooms = jRentsArray.getJSONObject(i).getInt(
-							"rest_rooms");
+					rest_rooms = jRentsArray.getJSONObject(i).getInt("rest_rooms");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -507,21 +486,18 @@ public class HouseApi2
 				int rent_type_id = 0;
 				try
 				{
-					rent_type_id = jRentsArray.getJSONObject(i).getInt(
-							"rent_type_id");
+					rent_type_id = jRentsArray.getJSONObject(i).getInt("rent_type_id");
 
 				} catch (Exception e)
 				{
 					// TODO: handle exception
 				}
 
-				double x_long = jRentsArray.getJSONObject(i)
-						.getDouble("x_long");
+				double x_long = jRentsArray.getJSONObject(i).getDouble("x_long");
 				double y_lat = jRentsArray.getJSONObject(i).getDouble("y_lat");
 
-				RentHouse newHouse = new RentHouse(rent_id, title, promote_pic,
-						price, address, rent_area, layer, total_layer, rooms,
-						rest_rooms, x_long, y_lat, rent_type_id);
+				RentHouse newHouse = new RentHouse(rent_id, title, promote_pic, price, address, rent_area, layer,
+						total_layer, rooms, rest_rooms, x_long, y_lat, rent_type_id);
 				Datas.mRentHouses.add(newHouse);
 
 			}
@@ -550,8 +526,7 @@ public class HouseApi2
 				String promote_pic = "";
 				try
 				{
-					promote_pic = jHousesArray.getJSONObject(i).getString(
-							"promote_pic_link");
+					promote_pic = jHousesArray.getJSONObject(i).getString("promote_pic_link");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -570,8 +545,7 @@ public class HouseApi2
 				String address = "";
 				try
 				{
-					address = jHousesArray.getJSONObject(i)
-							.getString("address");
+					address = jHousesArray.getJSONObject(i).getString("address");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -580,8 +554,7 @@ public class HouseApi2
 				double total_area = 0;
 				try
 				{
-					total_area = jHousesArray.getJSONObject(i).getDouble(
-							"total_area");
+					total_area = jHousesArray.getJSONObject(i).getDouble("total_area");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -599,8 +572,7 @@ public class HouseApi2
 				int total_layer = 0;
 				try
 				{
-					total_layer = jHousesArray.getJSONObject(i).getInt(
-							"total_lyaers");
+					total_layer = jHousesArray.getJSONObject(i).getInt("total_lyaers");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -618,8 +590,7 @@ public class HouseApi2
 				int rest_rooms = 0;
 				try
 				{
-					rest_rooms = jHousesArray.getJSONObject(i).getInt(
-							"rest_rooms");
+					rest_rooms = jHousesArray.getJSONObject(i).getInt("rest_rooms");
 				} catch (Exception e)
 				{
 					// TODO: handle exception
@@ -628,21 +599,18 @@ public class HouseApi2
 				int ground_type_id = 0;
 				try
 				{
-					ground_type_id = jHousesArray.getJSONObject(i).getInt(
-							"ground_type_id");
+					ground_type_id = jHousesArray.getJSONObject(i).getInt("ground_type_id");
 
 				} catch (Exception e)
 				{
 					// TODO: handle exception
 				}
 
-				double x_long = jHousesArray.getJSONObject(i).getDouble(
-						"x_long");
+				double x_long = jHousesArray.getJSONObject(i).getDouble("x_long");
 				double y_lat = jHousesArray.getJSONObject(i).getDouble("y_lat");
 
-				House newHouse = new House(house_id, title, promote_pic, price,
-						address, total_area, layer, total_layer, rooms,
-						rest_rooms, x_long, y_lat, ground_type_id);
+				House newHouse = new House(house_id, title, promote_pic, price, address, total_area, layer,
+						total_layer, rooms, rest_rooms, x_long, y_lat, ground_type_id);
 				Datas.mSaleHouses.add(newHouse);
 
 			}
@@ -658,8 +626,7 @@ public class HouseApi2
 
 	}
 
-	public static String getMessageFromServer(String requestMethod,
-			String apiPath, JSONObject json, String apiUrl)
+	public static String getMessageFromServer(String requestMethod, String apiPath, JSONObject json, String apiUrl)
 	{
 		Log.i(TAG, "Start Load from server:" + System.currentTimeMillis());
 		URL url;
@@ -673,12 +640,10 @@ public class HouseApi2
 			if (DEBUG)
 				Log.d(TAG, "URL: " + url);
 
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(requestMethod);
 
-			connection.setRequestProperty("Content-Type",
-					"application/json;charset=utf-8");
+			connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
 			if (requestMethod.equalsIgnoreCase("POST"))
 				connection.setDoOutput(true);
 			connection.setDoInput(true);
@@ -697,8 +662,7 @@ public class HouseApi2
 				outputStream.close();
 			}
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					connection.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			StringBuilder lines = new StringBuilder();
 			;
 			String tempStr;
